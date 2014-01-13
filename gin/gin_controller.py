@@ -27,26 +27,11 @@ class GinController(Controller):
         print('Player 2')
         print(self.board.players[1].hand)
 
+        print()
+        print(self.board.pile)
+        print('Player 1 discard...')
+        self.board.players[0].discard(2)
+        print(self.board.pile)
 
-        # self.deck = GinDeck()
-
-        # shuffle_deck = int(5 + (random() * 3))
-        # cut_deck = int(5 + (random() * 5))
-
-        # # Thorough shuffle
-        # for i in range(shuffle_deck):
-        #     self.deck.shuffle()
-        #     for j in range(cut_deck):
-        #         pivot = 0.2 + (random() * 0.6)
-        #         self.deck.cut(pivot=pivot)
-
-        # print(self.deck)
-
-        # hand = GinHand()
-        # hand.add(self.deck.draw(7))
-
-        # print()
-        # print(hand)
-        # print()
-        # print(len(self.deck))
-
+        print()
+        print(self.board.players[0].hand)

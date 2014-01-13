@@ -16,3 +16,6 @@ class Hand(object):
         else:
             for card in cards:
                 self.cards.append(card)
+
+    def discard(self, pos):
+        return self.cards.pop(pos)

@@ -14,6 +14,5 @@ class Controller(object, metaclass=ABCMeta):
 
         return cls._ctrl
 
-    @classmethod
-    def main_loop(cls):
+    def main_loop(self):
         pass
