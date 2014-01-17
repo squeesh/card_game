@@ -17,7 +17,7 @@ class Deck(object, metaclass=ABCMeta):
             self.cards = []
 
     def __str__(self):
-        return 'Deck:\n\t{}'.format('\n\t'.join([str(card) for card in self.cards]))
+        return 'Deck:\n{}'.format(' '.join([str(card) for card in self.cards]))
 
     def __len__(self):
         return len(self.cards)
@@ -42,7 +42,10 @@ class Deck(object, metaclass=ABCMeta):
     def draw(self, cards_num=1):
         drawn_cards = self.cards[:cards_num]
         self.cards = self.cards[cards_num:]
-        return drawn_cards
+        if cards_num == 1:
+            return drawn_cards[0]
+        else:
+            return drawn_cards
 
     def add(self, card, to_top=False):
         if to_top:

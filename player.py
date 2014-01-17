@@ -13,4 +13,8 @@ class Player(object):
         from gin.gin_controller import GinController
 
         ctrl = GinController.get()
-        ctrl.board.pile.add(self.hand.discard(pos))
+
+        discard = self.hand.discard(pos)
+        ctrl.board.pile.add(discard, to_top=True)
+
+        return discard

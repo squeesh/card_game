@@ -4,7 +4,7 @@ class Hand(object):
     cards = ()
 
     def __str__(self):
-        return 'Hand:\n\t{}'.format('\n\t'.join([str(card) for card in self.cards]))
+        return 'Hand:\n{}'.format(' '.join([str(card) for card in self.cards]))
 
     def __len__(self):
         return len(self.cards)

@@ -7,8 +7,8 @@ class GinDeck(Deck):
     def __init__(self):
         cards = []
 
-        for suit in ('Clubs', 'Spades', 'Hearts', 'Diamonds'):
-            for value in (list(range(2, 11)) + ['Jack', 'Queen', 'King', 'Ace']):
+        for suit in ('♤', '♧', '♡', '♢'):
+            for value in (list(range(2, 11)) + ['J', 'Q', 'K', 'A']):
                 cards.append(GinCard(str(value), suit))
 
         super(GinDeck, self).__init__(cards=cards)

@@ -11,4 +11,4 @@ class GinCard(Card):
         self.suit = suit
 
     def __str__(self):
-        return '{} of {}'.format(self.value, self.suit)
+        return '{}{}'.format(self.suit, self.value)
