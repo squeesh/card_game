@@ -1,3 +1,5 @@
+import platform
+
 from controller import Controller
 
 from gin.gin_deck import GinDeck
@@ -6,6 +8,19 @@ from gin.gin_player import GinPlayer
 from gin.gin_board import GinBoard
 
 class GinController(Controller):
+    if platform.system() == 'Windows':
+        HEART   = chr(3)
+        DIAMOND = chr(4)
+        SPADE   = chr(5)
+        CLUB    = chr(6)
+    else:
+        HEART   = '♥'
+        DIAMOND = '♦'
+        SPADE   = '♠'
+        CLUB    = '♣'
+
+    SUITS = (HEART, DIAMOND, SPADE, CLUB)
+
     def create_game(self):
         deck = GinDeck()
         deck.shuffle_well()
@@ -37,7 +52,7 @@ class GinController(Controller):
         # print(self.board.players[0].hand)
 
     def main_loop(self):
-        print('Welcome to shitty Gin', ' '.join(chr(n) for n in range(3, 3+4)))
+        print('Welcome to shitty Gin', ' '.join(GinController.SUITS))
 
         player_index = 0
         curr_player = self.board.players[player_index]
@@ -50,7 +65,7 @@ Player {}
 2    | View top card of pile
 3    | Draw card from Deck
 4    | Draw top card from pile
-5 X Y| Swap the position of X and Y in your hand
+5 X Y| Move card X to new position Y in your hand
 6 X  | Discard X card from hand
 end  | End turn
 
@@ -85,7 +100,7 @@ exit | Exit game
             elif data[0] == '5':
                 _, pos_a, pos_b = data.split(' ')
                 pos_a, pos_b = int(pos_a), int(pos_b)
-                curr_player.hand.swap(pos_a, pos_b)
+                curr_player.hand.move(pos_a, pos_b)
                 print('You swapped: {} and {}'.format(curr_player.hand.cards[pos_a], curr_player.hand.cards[pos_b]))
                 print(curr_player.hand)
 

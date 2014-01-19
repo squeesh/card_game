@@ -20,7 +20,7 @@ class Hand(object):
     def discard(self, pos):
         return self.cards.pop(pos)
 
-    def swap(self, pos_a, pos_b):
-        old_b = self.cards[pos_b]
-        self.cards[pos_b] = self.cards[pos_a]
-        self.cards[pos_a] = old_b
+    def move(self, pos_a, pos_b):
+        curr_card = self.cards.pop(pos_a)
+        self.cards.insert(pos_b, curr_card)
+
