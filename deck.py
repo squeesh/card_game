@@ -17,21 +17,17 @@ class Deck(object, metaclass=ABCMeta):
             self.cards = []
 
     def __str__(self):
-        return 'Deck:\n{}'.format(' '.join([str(card) for card in self.cards]))
+        return 'Deck:\n{}'.format('\n'.join([str(card) for card in self.cards]))
 
     def __len__(self):
         return len(self.cards)
 
     def shuffle_well(self):
-        shuffle_deck = int(5 + (random() * 3))
-        cut_deck = int(5 + (random() * 5))
-
         # Thorough shuffle
-        for i in range(shuffle_deck):
+        for i in range(5):
             self.shuffle()
-            for j in range(cut_deck):
-                pivot = 0.2 + (random() * 0.6)
-                self.cut(pivot=pivot)
+            for j in range(5):
+                self.cut(pivot=0.3)
 
     def shuffle(self, method='bridge', pivot=0.5):
         self.cards = shuffle_methods[method](self.cards, pivot=pivot)

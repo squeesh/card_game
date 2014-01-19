@@ -19,3 +19,8 @@ class Hand(object):
 
     def discard(self, pos):
         return self.cards.pop(pos)
+
+    def swap(self, pos_a, pos_b):
+        old_b = self.cards[pos_b]
+        self.cards[pos_b] = self.cards[pos_a]
+        self.cards[pos_a] = old_b

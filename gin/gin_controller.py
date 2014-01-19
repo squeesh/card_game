@@ -50,7 +50,8 @@ Player {}
 2    | View top card of pile
 3    | Draw card from Deck
 4    | Draw top card from pile
-5 X  | Discard X card from hand
+5 X Y| Swap the position of X and Y in your hand
+6 X  | Discard X card from hand
 end  | End turn
 
 exit | Exit game
@@ -61,6 +62,7 @@ exit | Exit game
 
             if data == '1':
                 print(curr_player.hand)
+
             elif data == '2':
                 if self.board.pile.cards:
                     print(self.board.pile.cards[0])
@@ -71,6 +73,7 @@ exit | Exit game
                 drawn = self.board.deck.draw()
                 curr_player.hand.add(drawn)
                 print('You drew: ', drawn)
+
             elif data == '4':
                 if self.board.pile.cards:
                     drawn = self.board.pile.draw()
@@ -78,12 +81,23 @@ exit | Exit game
                     print('You drew: ', drawn)
                 else:
                     print('Error: Pile empty')
+
             elif data[0] == '5':
+                _, pos_a, pos_b = data.split(' ')
+                pos_a, pos_b = int(pos_a), int(pos_b)
+                curr_player.hand.swap(pos_a, pos_b)
+                print('You swapped: {} and {}'.format(curr_player.hand.cards[pos_a], curr_player.hand.cards[pos_b]))
+                print(curr_player.hand)
+
+            elif data[0] == '6':
                 _, pos = data.split(' ')
                 print('You discarded: ', curr_player.discard(int(pos)))
+                print(curr_player.hand)
+
             elif data == 'end':
                 player_index = 0 if player_index else 1
                 curr_player = self.board.players[player_index]
+
             elif data == 'exit':
                 break
             else:
