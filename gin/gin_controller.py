@@ -37,7 +37,7 @@ class GinController(Controller):
         # print(self.board.players[0].hand)
 
     def main_loop(self):
-        print('Welcome to shitty Gin ♠ ♣ ♥ ♦')
+        print('Welcome to shitty Gin', ' '.join(chr(n) for n in range(3, 3+4)))
 
         player_index = 0
         curr_player = self.board.players[player_index]
