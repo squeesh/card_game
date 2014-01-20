@@ -12,15 +12,15 @@ class GinController(Controller):
     if platform.system() == 'Windows':
         HEART   = chr(3)
         DIAMOND = chr(4)
-        SPADE   = chr(5)
-        CLUB    = chr(6)
+        CLUB    = chr(5)
+        SPADE   = chr(6)
     else:
         HEART   = '♥'
         DIAMOND = '♦'
-        SPADE   = '♠'
         CLUB    = '♣'
+        SPADE   = '♠'
 
-    SUITS = (HEART, DIAMOND, SPADE, CLUB)
+    SUITS = (HEART, DIAMOND, CLUB, SPADE)
 
     def create_game(self):
         deck = GinDeck()
@@ -32,25 +32,6 @@ class GinController(Controller):
         )
 
         self.board = GinBoard(players, deck)
-
-        # print(deck)
-        # print(len(deck))
-
-        # print()
-        # print('Player 1')
-        # print(self.board.players[0].hand)
-        # print()
-        # print('Player 2')
-        # print(self.board.players[1].hand)
-
-        # print()
-        # print(self.board.pile)
-        # print('Player 1 discard...')
-        # self.board.players[0].discard(2)
-        # print(self.board.pile)
-
-        # print()
-        # print(self.board.players[0].hand)
 
     def main_loop(self):
         print('Welcome to shitty Gin', ' '.join(GinController.SUITS))
@@ -98,14 +79,13 @@ exit | Exit game
                 else:
                     print('Error: Pile empty')
 
-            elif data[0] == '5':
+            elif re.match('^5 \d+ \d+$', data):
                 _, pos_a, pos_b = data.split(' ')
                 pos_a, pos_b = int(pos_a), int(pos_b)
                 curr_player.hand.move(pos_a, pos_b)
-                print('You swapped: {} and {}'.format(curr_player.hand.cards[pos_a], curr_player.hand.cards[pos_b]))
                 print(curr_player.hand)
 
-            elif data[0] == '6':
+            elif re.match('^6 \d+$', data):
                 _, pos = data.split(' ')
                 print('You discarded: ', curr_player.discard(int(pos)))
                 print(curr_player.hand)
