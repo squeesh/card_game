@@ -1,4 +1,5 @@
 import platform
+import re
 
 from controller import Controller
 
@@ -75,21 +76,21 @@ exit | Exit game
 
             data = input('Command: ')
 
-            if data == '1':
+            if re.match('^1$', data):
                 print(curr_player.hand)
 
-            elif data == '2':
+            elif re.match('^2$', data):
                 if self.board.pile.cards:
                     print(self.board.pile.cards[0])
                 else:
                     print('Pile is empty')
 
-            elif data == '3':
+            elif re.match('^3$', data):
                 drawn = self.board.deck.draw()
                 curr_player.hand.add(drawn)
                 print('You drew: ', drawn)
 
-            elif data == '4':
+            elif re.match('^4$', data):
                 if self.board.pile.cards:
                     drawn = self.board.pile.draw()
                     curr_player.hand.add(drawn)
@@ -109,11 +110,11 @@ exit | Exit game
                 print('You discarded: ', curr_player.discard(int(pos)))
                 print(curr_player.hand)
 
-            elif data == 'end':
+            elif re.match('^end$', data):
                 player_index = 0 if player_index else 1
                 curr_player = self.board.players[player_index]
 
-            elif data == 'exit':
+            elif re.match('^exit$', data):
                 break
             else:
                 print('Error: Please rekey')
