@@ -1,13 +1,23 @@
 
 from hand import Hand
+from player_input import PlayerInput
 
 class Player(object):
-    hand = None
     HandClass = Hand
+    InputClass = PlayerInput
 
-    def __init__(self, cards):
+    hand = None
+    input = None
+    player_num = 0
+
+    def __init__(self, cards, player_num):
         self.hand = self.HandClass()
         self.hand.add(cards)
+
+        self.input = self.InputClass()
+        self.input.player = self
+
+        self.player_num = player_num
 
     def discard(self, pos):
         from gin.gin_controller import GinController
@@ -19,5 +29,11 @@ class Player(object):
 
         return discard
 
-class RemotePlayer(Player):
+    def process_input(self):
+        self.input.process()
+
+
+class RemotePlayer(object):
     pass
+
+
