@@ -1,0 +1,3 @@
+ALLOW_REMOTE = True
+REMOTE_HOST = 'localhost'
+REMOTE_PORT = 50007

@@ -3,13 +3,14 @@ import re
 
 from controller import Controller
 from exceptions import InputValidationException
+import settings
 
 from gin.gin_deck import GinDeck
 from gin.gin_hand import GinHand
-from gin.gin_player import GinPlayer
+from gin.gin_player import GinPlayer, RemoteGinPlayer
 from gin.gin_board import GinBoard
 
-class GinController(Controller):
+class BaseGinController(Controller)
     if platform.system() == 'Windows':
         HEART   = chr(3)
         DIAMOND = chr(4)
@@ -23,6 +24,8 @@ class GinController(Controller):
 
     SUITS = (HEART, DIAMOND, CLUB, SPADE)
 
+
+class GinController(BaseGinController):
     def create_game(self):
         deck = GinDeck()
         deck.shuffle_well()
@@ -35,8 +38,6 @@ class GinController(Controller):
         self.board = GinBoard(players, deck)
 
     def main_loop(self):
-        print('Welcome to shitty Gin', ' '.join(GinController.SUITS))
-
         player_index = 0
         curr_player = self.board.players[player_index]
 
@@ -116,5 +117,18 @@ exit | Exit game
                 print()
                 print('Error: Please rekey')
 
+class ServerGinController(BaseGinController):
+    def create_game(self):
+        deck = GinDeck()
+        deck.shuffle_well()
 
+        players = (
+            GinPlayer(deck.draw(11)),
+            RemoteGinPlayer(deck.draw(11)),
+        )
+
+        self.board = GinBoard(players, deck)
+
+class ClientGinController(BaseGinController):
+    pass
 

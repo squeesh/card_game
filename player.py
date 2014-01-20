@@ -18,3 +18,6 @@ class Player(object):
         ctrl.board.pile.add(discard, to_top=True)
 
         return discard
+
+class RemotePlayer(Player):
+    pass

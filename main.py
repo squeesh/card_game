@@ -1,5 +1,3 @@
-from gin.gin_controller import GinController
+from launcher import Launcher
+Launcher.start_game()
 
-ctrl = GinController.get()
-ctrl.create_game()
-ctrl.main_loop()
