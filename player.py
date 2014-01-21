@@ -31,9 +31,3 @@ class Player(object):
 
     def process_input(self):
         self.input.process()
-
-
-class RemotePlayer(object):
-    pass
-
-

@@ -1,6 +1,6 @@
-from player import Player, RemotePlayer
+from player import Player
 from gin.gin_hand import GinHand
-from gin.gin_player_input import ConsoleGinPlayerInput
+from gin.gin_player_input import ConsoleGinPlayerInput, RemoteConsoleGinPlayerInput
 
 
 class GinPlayer(Player):
@@ -8,5 +8,6 @@ class GinPlayer(Player):
     InputClass = ConsoleGinPlayerInput
 
 
-class RemoteGinPlayer(RemotePlayer):
+class RemoteGinPlayer(Player):
     HandClass = GinHand
+    InputClass = RemoteConsoleGinPlayerInput

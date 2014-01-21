@@ -30,7 +30,7 @@ class GinController(BaseGinController):
 
         self.players = (
             GinPlayer(deck.draw(11), 1),
-            GinPlayer(deck.draw(11), 2),
+            RemoteGinPlayer(deck.draw(11), 2),
         )
         self.active_player = 0
 
