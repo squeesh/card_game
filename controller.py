@@ -5,9 +5,11 @@ class Controller(object, metaclass=ABCMeta):
     players = None
     active_player = None
     force_exit = False
+    active_connections = None
 
     def __init__(self):
         assert not self._ctrl
+        self.active_connections = []
 
     @classmethod
     def get(cls):
@@ -27,4 +29,6 @@ class Controller(object, metaclass=ABCMeta):
             self.current_player().process_input()
 
             if self.force_exit:
+                for conn in self.active_connections:
+                    conn.close()
                 break

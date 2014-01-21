@@ -13,12 +13,7 @@ class ConsoleGinPlayerInput(PlayerInput):
     def get_input(self):
         return input('Command: ')
 
-    def process(self):
-        from gin.gin_controller import GinController
-        ctrl = GinController.get()
-
-        curr_player = self.player
-
+    def print_menu(self):
         print(
 """
 Player {}
@@ -31,14 +26,13 @@ Player {}
 end  | End turn
 
 exit | Exit game
-""".format(curr_player.player_num), file=self.output_buffer
+""".format(self.player.player_num), file=self.output_buffer
         )
 
-        data = self.get_input()
-
+    def input_action(self, ctrl, data):
         try:
             if re.match('^1$', data):
-                print(curr_player.hand, file=self.output_buffer)
+                print(self.player.hand, file=self.output_buffer)
 
             elif re.match('^2$', data):
                 if ctrl.board.pile.cards:
@@ -48,13 +42,13 @@ exit | Exit game
 
             elif re.match('^3$', data):
                 drawn = ctrl.board.deck.draw()
-                curr_player.hand.add(drawn)
+                self.player.hand.add(drawn)
                 print('You drew: ', drawn, file=self.output_buffer)
 
             elif re.match('^4$', data):
                 if ctrl.board.pile.cards:
                     drawn = ctrl.board.pile.draw()
-                    curr_player.hand.add(drawn)
+                    self.player.hand.add(drawn)
                     print('You drew: ', drawn, file=self.output_buffer)
                 else:
                     print('Error: Pile empty', file=self.output_buffer)
@@ -63,23 +57,23 @@ exit | Exit game
                 _, pos_a, pos_b = data.split(' ')
                 pos_a, pos_b = int(pos_a), int(pos_b)
 
-                cards_in_hand = len(curr_player.hand.cards)
+                cards_in_hand = len(self.player.hand.cards)
                 if pos_a < 0 or pos_a >= cards_in_hand or pos_b < 0 or pos_b >= cards_in_hand:
                     raise InputValidationException()
 
-                curr_player.hand.move(pos_a, pos_b)
-                print(curr_player.hand, file=self.output_buffer)
+                self.player.hand.move(pos_a, pos_b)
+                print(self.player.hand, file=self.output_buffer)
 
             elif re.match('^6 \d+$', data):
                 _, pos = data.split(' ')
                 pos = int(pos)
 
-                cards_in_hand = len(curr_player.hand.cards)
+                cards_in_hand = len(self.player.hand.cards)
                 if pos < 0 or pos >= cards_in_hand:
                     raise InputValidationException()
 
-                print('You discarded: ', curr_player.discard(pos), file=self.output_buffer)
-                print(curr_player.hand, file=self.output_buffer)
+                print('You discarded: ', self.player.discard(pos), file=self.output_buffer)
+                print(self.player.hand, file=self.output_buffer)
 
             elif re.match('^end$', data):
                 ctrl.next_turn()
@@ -94,16 +88,48 @@ exit | Exit game
             print('Error: Please rekey', file=self.output_buffer)
 
 
+    def process(self):
+        from gin.gin_controller import GinController
+        ctrl = GinController.get()
+
+        self.print_menu()
+        data = self.get_input()
+        self.input_action(ctrl, data)
+
+
 class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
+    conn = None
+
     def __init__(self):
+        from gin.gin_controller import GinController
+        ctrl = GinController.get()
+
         self.output_buffer = StringIO()
+        import socket
+
+        HOST = ''                 # Symbolic name meaning all available interfaces
+        PORT = 50007              # Arbitrary non-privileged port
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind((HOST, PORT))
+        sock.listen(1)
+        self.conn, addr = sock.accept()
+        ctrl.active_connections.append(self.conn)
+
+        print('Connected by', addr)
+
 
     def get_input(self):
-        return '1'
+        data = self.conn.recv(1024).decode('utf-8')
+        return data
 
-    def process(self):
-        super(RemoteConsoleGinPlayerInput, self).process()
+    def print_menu(self):
+        super(RemoteConsoleGinPlayerInput, self).print_menu()
         self.output_buffer.seek(0)
-        print(self.output_buffer.read())
+        self.conn.sendall(bytearray(self.output_buffer.read(), 'utf-8'))
         self.output_buffer.truncate(0)
 
+    def input_action(self, ctrl, data):
+        super(RemoteConsoleGinPlayerInput, self).input_action(ctrl, data)
+        self.output_buffer.seek(0)
+        self.conn.sendall(bytearray(self.output_buffer.read(), 'utf-8'))
+        self.output_buffer.truncate(0)
