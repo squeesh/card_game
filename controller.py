@@ -1,11 +1,20 @@
 from abc import ABCMeta
+import pickle
 
 class Controller(object, metaclass=ABCMeta):
     _ctrl = None
-    players = None
-    active_player = None
-    force_exit = False
-    active_connections = None
+
+    players         = None
+    active_player   = None
+
+    force_exit          = False
+    active_connections  = None
+
+    COMMANDS = {
+        'NO_ACTION': '0',
+        'GET_INPUT': '1',
+        'KILL_CONN': '2',
+    }
 
     def __init__(self):
         assert not self._ctrl
@@ -29,6 +38,18 @@ class Controller(object, metaclass=ABCMeta):
             self.current_player().process_input()
 
             if self.force_exit:
-                for conn in self.active_connections:
-                    conn.close()
                 break
+
+        self.exit_game()
+
+    def exit_game(self):
+        for conn in self.active_connections:
+            data_dict = {
+                'data': '',
+                'command': self.COMMANDS['KILL_CONN'],
+            }
+
+            data = pickle.dumps(data_dict)
+            conn.sendall(data)
+            conn.close()
+

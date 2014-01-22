@@ -11,13 +11,18 @@ from player_input import PlayerInput
 class ConsoleGinPlayerInput(PlayerInput):
     output_buffer = sys.stdout
 
-    def print_data(self, *args, command='0', **kwargs):
+    def print_data(self, *args, command=None, **kwargs):
+        from gin.gin_controller import GinController
+        ctrl = GinController.get()
+
+        if not command:
+            command = ctrl.COMMANDS['NO_ACTION']
         print(*args, file=self.output_buffer, **kwargs)
 
     def get_input(self):
         return input('Command: ')
 
-    def print_menu(self):
+    def print_menu(self, ctrl):
         self.print_data(
 """
 Player {}
@@ -30,7 +35,7 @@ Player {}
 end  | End turn
 
 exit | Exit game
-""".format(self.player.player_num), command='1'
+""".format(self.player.player_num), command=ctrl.COMMANDS['GET_INPUT']
         )
 
     def input_action(self, ctrl, data):
@@ -88,15 +93,14 @@ exit | Exit game
                 raise InputValidationException()
 
         except InputValidationException:
-            self.print_data()
-            self.print_data('Error: Please rekey')
+            self.print_data('\nError: Please rekey')
 
 
     def process(self):
         from gin.gin_controller import GinController
         ctrl = GinController.get()
 
-        self.print_menu()
+        self.print_menu(ctrl)
         data = self.get_input()
         self.input_action(ctrl, data)
 
@@ -108,7 +112,7 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
         from gin.gin_controller import GinController
         ctrl = GinController.get()
 
-        self.output_buffer = StringIO()
+        # self.output_buffer = StringIO()
 
         HOST = ''                 # Symbolic name meaning all available interfaces
         PORT = 50007              # Arbitrary non-privileged port
@@ -120,7 +124,14 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
 
         print(addr, 'has connected...')
 
-    def print_data(self, *args, command='0', **kwargs):
+    def print_data(self, *args, command=None, **kwargs):
+        from gin.gin_controller import GinController
+        ctrl = GinController.get()
+
+        if not command:
+            command = ctrl.COMMANDS['NO_ACTION']
+
+        self.output_buffer = StringIO()
         super(RemoteConsoleGinPlayerInput, self).print_data(*args, command=command, **kwargs)
 
         self.output_buffer.seek(0)
@@ -128,24 +139,14 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
             'data': self.output_buffer.read(),
             'command': command,
         }
-        self.output_buffer.seek(0)
-        self.output_buffer.truncate(0)
+        # self.output_buffer.seek(0)
+        # self.output_buffer.truncate(0)
+        self.output_buffer.close()
 
+        # print('sending: ', data_dict)
         data = pickle.dumps(data_dict)
         self.conn.sendall(data)
 
 
     def get_input(self):
         return self.conn.recv(4096).decode('utf-8')
-
-    # def print_menu(self):
-    #     super(RemoteConsoleGinPlayerInput, self).print_menu()
-    #     self.output_buffer.seek(0)
-    #     self.print_data(self.output_buffer.read())
-    #     self.output_buffer.truncate(0)
-
-    # def input_action(self, ctrl, data):
-    #     super(RemoteConsoleGinPlayerInput, self).input_action(ctrl, data)
-    #     self.output_buffer.seek(0)
-    #     self.print_data(self.output_buffer.read())
-    #     self.output_buffer.truncate(0)

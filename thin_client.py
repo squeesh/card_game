@@ -16,15 +16,18 @@ while True:
     if rcv_data:
         data_dict = pickle.loads(rcv_data)
 
+        # print(data_dict)
         print(data_dict['data'])
         if data_dict['command'] == '1':
 
-            while not data:
-                data = input('Command: ')
+            # while not data:
+            data = input('Command: ')
+            if not data:
+                data = '\0'
 
             sock.sendall(bytearray(data, 'utf-8'))
 
-        if data == 'exit':
+        if data == 'exit' or data_dict['command'] == '2':
             break
 
 
