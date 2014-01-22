@@ -1,20 +1,24 @@
 import re
 from io import StringIO
 import sys
+import pickle
+import socket
 
 from exceptions import InputValidationException
 from player_input import PlayerInput
 
 
-
 class ConsoleGinPlayerInput(PlayerInput):
     output_buffer = sys.stdout
+
+    def print_data(self, *args, command='0', **kwargs):
+        print(*args, file=self.output_buffer, **kwargs)
 
     def get_input(self):
         return input('Command: ')
 
     def print_menu(self):
-        print(
+        self.print_data(
 """
 Player {}
 1    | View hand
@@ -26,32 +30,32 @@ Player {}
 end  | End turn
 
 exit | Exit game
-""".format(self.player.player_num), file=self.output_buffer
+""".format(self.player.player_num), command='1'
         )
 
     def input_action(self, ctrl, data):
         try:
             if re.match('^1$', data):
-                print(self.player.hand, file=self.output_buffer)
+                self.print_data(self.player.hand)
 
             elif re.match('^2$', data):
                 if ctrl.board.pile.cards:
-                    print(ctrl.board.pile.cards[0], file=self.output_buffer)
+                    self.print_data(ctrl.board.pile.cards[0])
                 else:
-                    print('Pile is empty', file=self.output_buffer)
+                    self.print_data('Pile is empty')
 
             elif re.match('^3$', data):
                 drawn = ctrl.board.deck.draw()
                 self.player.hand.add(drawn)
-                print('You drew: ', drawn, file=self.output_buffer)
+                self.print_data('You drew: ', drawn)
 
             elif re.match('^4$', data):
                 if ctrl.board.pile.cards:
                     drawn = ctrl.board.pile.draw()
                     self.player.hand.add(drawn)
-                    print('You drew: ', drawn, file=self.output_buffer)
+                    self.print_data('You drew: ', drawn)
                 else:
-                    print('Error: Pile empty', file=self.output_buffer)
+                    self.print_data('Error: Pile empty')
 
             elif re.match('^5 \d+ \d+$', data):
                 _, pos_a, pos_b = data.split(' ')
@@ -62,7 +66,7 @@ exit | Exit game
                     raise InputValidationException()
 
                 self.player.hand.move(pos_a, pos_b)
-                print(self.player.hand, file=self.output_buffer)
+                self.print_data(self.player.hand)
 
             elif re.match('^6 \d+$', data):
                 _, pos = data.split(' ')
@@ -72,8 +76,8 @@ exit | Exit game
                 if pos < 0 or pos >= cards_in_hand:
                     raise InputValidationException()
 
-                print('You discarded: ', self.player.discard(pos), file=self.output_buffer)
-                print(self.player.hand, file=self.output_buffer)
+                self.print_data('You discarded: ', self.player.discard(pos))
+                self.print_data(self.player.hand)
 
             elif re.match('^end$', data):
                 ctrl.next_turn()
@@ -84,8 +88,8 @@ exit | Exit game
                 raise InputValidationException()
 
         except InputValidationException:
-            print(file=self.output_buffer)
-            print('Error: Please rekey', file=self.output_buffer)
+            self.print_data()
+            self.print_data('Error: Please rekey')
 
 
     def process(self):
@@ -105,7 +109,6 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
         ctrl = GinController.get()
 
         self.output_buffer = StringIO()
-        import socket
 
         HOST = ''                 # Symbolic name meaning all available interfaces
         PORT = 50007              # Arbitrary non-privileged port
@@ -115,21 +118,34 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
         self.conn, addr = sock.accept()
         ctrl.active_connections.append(self.conn)
 
-        print('Connected by', addr)
+        print(addr, 'has connected...')
+
+    def print_data(self, *args, command='0', **kwargs):
+        super(RemoteConsoleGinPlayerInput, self).print_data(*args, command=command, **kwargs)
+
+        self.output_buffer.seek(0)
+        data_dict = {
+            'data': self.output_buffer.read(),
+            'command': command,
+        }
+        self.output_buffer.seek(0)
+        self.output_buffer.truncate(0)
+
+        data = pickle.dumps(data_dict)
+        self.conn.sendall(data)
 
 
     def get_input(self):
-        data = self.conn.recv(1024).decode('utf-8')
-        return data
+        return self.conn.recv(4096).decode('utf-8')
 
-    def print_menu(self):
-        super(RemoteConsoleGinPlayerInput, self).print_menu()
-        self.output_buffer.seek(0)
-        self.conn.sendall(bytearray(self.output_buffer.read(), 'utf-8'))
-        self.output_buffer.truncate(0)
+    # def print_menu(self):
+    #     super(RemoteConsoleGinPlayerInput, self).print_menu()
+    #     self.output_buffer.seek(0)
+    #     self.print_data(self.output_buffer.read())
+    #     self.output_buffer.truncate(0)
 
-    def input_action(self, ctrl, data):
-        super(RemoteConsoleGinPlayerInput, self).input_action(ctrl, data)
-        self.output_buffer.seek(0)
-        self.conn.sendall(bytearray(self.output_buffer.read(), 'utf-8'))
-        self.output_buffer.truncate(0)
+    # def input_action(self, ctrl, data):
+    #     super(RemoteConsoleGinPlayerInput, self).input_action(ctrl, data)
+    #     self.output_buffer.seek(0)
+    #     self.print_data(self.output_buffer.read())
+    #     self.output_buffer.truncate(0)
