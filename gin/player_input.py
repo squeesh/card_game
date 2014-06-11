@@ -1,9 +1,7 @@
 import re
-from io import StringIO
 import sys
-import pickle
-import socket
 
+from controller import Controller
 from exceptions import InputValidationException
 from player_input import PlayerInput
 
@@ -12,8 +10,7 @@ class ConsoleGinPlayerInput(PlayerInput):
     output_buffer = sys.stdout
 
     def print_data(self, *args, command=None, **kwargs):
-        from gin.controller import GinController
-        ctrl = GinController.get()
+        ctrl = Controller.get()
 
         if not command:
             command = ctrl.COMMANDS['NO_ACTION']
@@ -97,56 +94,8 @@ exit | Exit game
 
 
     def process(self):
-        from gin.controller import GinController
-        ctrl = GinController.get()
+        ctrl = Controller.get()
 
         self.print_menu(ctrl)
         data = self.get_input()
         self.input_action(ctrl, data)
-
-
-class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
-    conn = None
-
-    def __init__(self):
-        from gin.controller import GinController
-        ctrl = GinController.get()
-
-        # self.output_buffer = StringIO()
-
-        HOST = ''                 # Symbolic name meaning all available interfaces
-        PORT = 50007              # Arbitrary non-privileged port
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((HOST, PORT))
-        sock.listen(1)
-        self.conn, addr = sock.accept()
-        ctrl.active_connections.append(self.conn)
-
-        print(addr, 'has connected...')
-
-    def print_data(self, *args, command=None, **kwargs):
-        from gin.controller import GinController
-        ctrl = GinController.get()
-
-        if not command:
-            command = ctrl.COMMANDS['NO_ACTION']
-
-        self.output_buffer = StringIO()
-        super(RemoteConsoleGinPlayerInput, self).print_data(*args, command=command, **kwargs)
-
-        self.output_buffer.seek(0)
-        data_dict = {
-            'data': self.output_buffer.read(),
-            'command': command,
-        }
-        # self.output_buffer.seek(0)
-        # self.output_buffer.truncate(0)
-        self.output_buffer.close()
-
-        # print('sending: ', data_dict)
-        data = pickle.dumps(data_dict)
-        self.conn.sendall(data)
-
-
-    def get_input(self):
-        return self.conn.recv(4096).decode('utf-8')

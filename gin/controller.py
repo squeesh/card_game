@@ -1,14 +1,12 @@
 import platform
 
 from controller import Controller
-import settings
 
 from gin.deck import GinDeck
-from gin.hand import GinHand
-from gin.player import GinPlayer, RemoteGinPlayer
+from gin.player import GinPlayer
 from gin.board import GinBoard
 
-class BaseGinController(Controller):
+class GinController(Controller):
     if platform.system() == 'Windows':
         HEART   = chr(3)
         DIAMOND = chr(4)
@@ -22,33 +20,19 @@ class BaseGinController(Controller):
 
     SUITS = (HEART, DIAMOND, CLUB, SPADE)
 
+    def get_players(self, deck):
+        raise NotImplementedError
 
-class GinController(BaseGinController):
     def create_game(self):
         deck = GinDeck()
         deck.shuffle_well()
 
-        self.players = (
-            GinPlayer(deck.draw(11), 1),
-            RemoteGinPlayer(deck.draw(11), 2),
-        )
+        self.players = self.get_players(deck)
         self.active_player = 0
 
         self.board = GinBoard(self.players, deck)
 
 
-# class ServerGinController(BaseGinController):
-#     def create_game(self):
-#         deck = GinDeck()
-#         deck.shuffle_well()
-
-#         self.players = (
-#             GinPlayer(deck.draw(11)),
-#             RemoteGinPlayer(deck.draw(11)),
-#         )
-
-#         self.board = GinBoard(players, deck)
-
-# class ClientGinController(BaseGinController):
-#     pass
-
+class AllLocalGinController(GinController):
+    def get_players(self, deck):
+        return (GinPlayer(deck.draw(11), 1), GinPlayer(deck.draw(11), 2))

@@ -1,4 +1,4 @@
-
+from controller import Controller
 from hand import Hand
 from player_input import PlayerInput
 
@@ -20,9 +20,7 @@ class Player(object):
         self.player_num = player_num
 
     def discard(self, pos):
-        from gin.controller import GinController
-
-        ctrl = GinController.get()
+        ctrl = Controller.get()
 
         discard = self.hand.discard(pos)
         ctrl.board.pile.add(discard, to_top=True)

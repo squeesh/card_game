@@ -1,9 +1,10 @@
 # client program
 import socket
 import pickle
+import settings
 
-HOST = 'localhost'
-PORT = 50007
+HOST = settings.REMOTE_HOST
+PORT = settings.REMOTE_PORT
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
 

@@ -22,10 +22,10 @@ class Controller(object, metaclass=ABCMeta):
 
     @classmethod
     def get(cls):
-        if not cls._ctrl:
-            cls._ctrl = cls()
+        if not Controller._ctrl:
+            Controller._ctrl = cls()
 
-        return cls._ctrl
+        return Controller._ctrl
 
     def current_player(self):
         return self.players[self.active_player]
