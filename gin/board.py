@@ -2,7 +2,7 @@
 from board import Board
 
 from deck import Deck
-from gin.gin_deck import GinDeck
+from gin.deck import GinDeck
 
 class GinBoard(Board):
     deck = None

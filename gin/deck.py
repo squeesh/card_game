@@ -1,11 +1,11 @@
 from deck import Deck
 
-from gin.gin_card import GinCard
+from gin.card import GinCard
 
 
 class GinDeck(Deck):
     def __init__(self):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
 
         cards = []
 

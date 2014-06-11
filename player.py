@@ -20,7 +20,7 @@ class Player(object):
         self.player_num = player_num
 
     def discard(self, pos):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
 
         ctrl = GinController.get()
 

@@ -12,7 +12,7 @@ class ConsoleGinPlayerInput(PlayerInput):
     output_buffer = sys.stdout
 
     def print_data(self, *args, command=None, **kwargs):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
         ctrl = GinController.get()
 
         if not command:
@@ -97,7 +97,7 @@ exit | Exit game
 
 
     def process(self):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
         ctrl = GinController.get()
 
         self.print_menu(ctrl)
@@ -109,7 +109,7 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
     conn = None
 
     def __init__(self):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
         ctrl = GinController.get()
 
         # self.output_buffer = StringIO()
@@ -125,7 +125,7 @@ class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
         print(addr, 'has connected...')
 
     def print_data(self, *args, command=None, **kwargs):
-        from gin.gin_controller import GinController
+        from gin.controller import GinController
         ctrl = GinController.get()
 
         if not command:

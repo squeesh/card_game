@@ -3,10 +3,10 @@ import platform
 from controller import Controller
 import settings
 
-from gin.gin_deck import GinDeck
-from gin.gin_hand import GinHand
-from gin.gin_player import GinPlayer, RemoteGinPlayer
-from gin.gin_board import GinBoard
+from gin.deck import GinDeck
+from gin.hand import GinHand
+from gin.player import GinPlayer, RemoteGinPlayer
+from gin.board import GinBoard
 
 class BaseGinController(Controller):
     if platform.system() == 'Windows':
