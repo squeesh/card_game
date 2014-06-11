@@ -1,6 +1,7 @@
 from abc import ABCMeta
 import pickle
 
+
 class Controller(object, metaclass=ABCMeta):
     _ctrl = None
 
@@ -52,4 +53,3 @@ class Controller(object, metaclass=ABCMeta):
             data = pickle.dumps(data_dict)
             conn.sendall(data)
             conn.close()
-

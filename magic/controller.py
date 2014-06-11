@@ -1,5 +1,6 @@
 from controller import Controller
 
+
 class MagicController(Controller):
 	STATES = {
 		'DRAW': 0,

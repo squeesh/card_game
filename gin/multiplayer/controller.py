@@ -1,7 +1,7 @@
-from gin.player import GinPlayer
-from gin.multiplayer.player import RemoteGinPlayer
-
 from gin.controller import GinController
+from gin.multiplayer.player import RemoteGinPlayer
+from gin.player import GinPlayer
+
 
 class LocalRemoteGinController(GinController):
     def get_players(self, deck):

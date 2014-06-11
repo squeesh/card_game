@@ -3,7 +3,6 @@ import platform
 from controller import Controller
 
 from gin.deck import GinDeck
-from gin.player import GinPlayer
 from gin.board import GinBoard
 
 class GinController(Controller):
@@ -31,8 +30,3 @@ class GinController(Controller):
         self.active_player = 0
 
         self.board = GinBoard(self.players, deck)
-
-
-class AllLocalGinController(GinController):
-    def get_players(self, deck):
-        return (GinPlayer(deck.draw(11), 1), GinPlayer(deck.draw(11), 2))

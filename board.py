@@ -1,4 +1,3 @@
-
 class Board(object):
     players = ()
 

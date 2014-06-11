@@ -1,6 +1,6 @@
 from board import Board
-
 from deck import Deck
+
 from gin.deck import GinDeck
 
 

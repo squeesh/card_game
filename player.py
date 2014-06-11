@@ -2,6 +2,7 @@ from controller import Controller
 from hand import Hand
 from player_input import PlayerInput
 
+
 class Player(object):
     HandClass = Hand
     InputClass = PlayerInput

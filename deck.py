@@ -3,9 +3,11 @@ from random import random
 
 from util import bridge_shuffle, cut_deck
 
+
 shuffle_methods = {
     'bridge': bridge_shuffle,
 }
+
 
 class Deck(object, metaclass=ABCMeta):
     cards = None

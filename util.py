@@ -1,6 +1,7 @@
 from random import random
 from itertools import chain
 
+
 def bridge_shuffle(cards, **kwargs):
     half = len(cards)//2
 
