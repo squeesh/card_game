@@ -1,7 +1,8 @@
 from player import Player
 
 from gin.hand import GinHand
-from gin.player_input import ConsoleGinPlayerInput
+
+from gin.console.player_input import ConsoleGinPlayerInput
 
 
 class GinPlayer(Player):

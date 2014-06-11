@@ -5,7 +5,7 @@ import socket
 from controller import Controller
 import settings
 
-from gin.player_input import ConsoleGinPlayerInput
+from gin.console.player_input import ConsoleGinPlayerInput
 
 
 class RemoteConsoleGinPlayerInput(ConsoleGinPlayerInput):
