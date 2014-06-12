@@ -1,4 +1,4 @@
-from player import Player
+from base.player import Player
 
 from gin.hand import GinHand
 from gin.multiplayer.player_input import RemoteConsoleGinPlayerInput

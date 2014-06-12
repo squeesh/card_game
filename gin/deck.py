@@ -1,4 +1,4 @@
-from deck import Deck
+from base.deck import Deck
 
 from gin.card import GinCard
 

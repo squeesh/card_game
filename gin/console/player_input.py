@@ -1,9 +1,9 @@
 import re
 import sys
 
-from controller import Controller
-from exceptions import InputValidationException, DeckOverDrawException
-from player_input import PlayerInput
+from base.controller import Controller
+from base.exceptions import InputValidationException, DeckOverDrawException
+from base.player_input import PlayerInput
 
 
 class ConsoleGinPlayerInput(PlayerInput):

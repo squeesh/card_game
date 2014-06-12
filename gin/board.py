@@ -1,5 +1,5 @@
-from board import Board
-from deck import Deck
+from base.board import Board
+from base.deck import Deck
 
 from gin.deck import GinDeck
 

@@ -1,4 +1,4 @@
-from hand import Hand
+from base.hand import Hand
 
 
 class GinHand(Hand):

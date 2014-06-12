@@ -1,6 +1,6 @@
 import platform
 
-from controller import Controller
+from base.controller import Controller
 
 from gin.deck import GinDeck
 from gin.board import GinBoard

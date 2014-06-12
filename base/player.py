@@ -1,6 +1,6 @@
-from controller import Controller
-from hand import Hand
-from player_input import PlayerInput
+from base.controller import Controller
+from base.hand import Hand
+from base.player_input import PlayerInput
 
 
 class Player(object):

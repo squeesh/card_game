@@ -1,9 +1,8 @@
 from abc import ABCMeta
 from random import random
 
-from exceptions import DeckOverDrawException
-
-from util import bridge_shuffle, cut_deck
+from base.exceptions import DeckOverDrawException
+from base.util import bridge_shuffle, cut_deck
 
 
 shuffle_methods = {

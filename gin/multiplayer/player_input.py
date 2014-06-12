@@ -2,8 +2,9 @@ from io import StringIO
 import pickle
 import socket
 
-from controller import Controller
 import settings
+
+from base.controller import Controller
 
 from gin.console.player_input import ConsoleGinPlayerInput
 
