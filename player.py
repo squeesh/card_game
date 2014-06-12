@@ -20,6 +20,13 @@ class Player(object):
 
         self.player_num = player_num
 
+    def draw(self, deck):
+        ctrl = Controller.get()
+
+        drawn = deck.draw()
+        self.hand.add(drawn)
+        return drawn
+
     def discard(self, pos):
         ctrl = Controller.get()
 

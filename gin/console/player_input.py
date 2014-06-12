@@ -2,7 +2,7 @@ import re
 import sys
 
 from controller import Controller
-from exceptions import InputValidationException
+from exceptions import InputValidationException, DeckOverDrawException
 from player_input import PlayerInput
 
 
@@ -47,16 +47,17 @@ exit | Exit game
                     self.print_data('Pile is empty')
 
             elif re.match('^3$', data):
-                drawn = ctrl.board.deck.draw()
-                self.player.hand.add(drawn)
-                self.print_data('You drew: ', drawn)
+                try:
+                    drawn = self.player.draw(ctrl.board.deck)
+                    self.print_data('You drew: ', drawn)
+                except DeckOverDrawException:
+                    self.print_data('Error: Pile empty')
 
             elif re.match('^4$', data):
-                if ctrl.board.pile.cards:
-                    drawn = ctrl.board.pile.draw()
-                    self.player.hand.add(drawn)
+                try:
+                    drawn = self.player.draw(ctrl.board.pile)
                     self.print_data('You drew: ', drawn)
-                else:
+                except DeckOverDrawException:
                     self.print_data('Error: Pile empty')
 
             elif re.match('^5 \d+ \d+$', data):

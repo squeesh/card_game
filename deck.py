@@ -1,6 +1,8 @@
 from abc import ABCMeta
 from random import random
 
+from exceptions import DeckOverDrawException
+
 from util import bridge_shuffle, cut_deck
 
 
@@ -37,13 +39,21 @@ class Deck(object, metaclass=ABCMeta):
     def cut(self, pivot=0.5):
         self.cards = cut_deck(self.cards, pivot=pivot)
 
-    def draw(self, cards_num=1):
+    def draw(self):
+        if not len(self.cards):
+            raise DeckOverDrawException()
+
+        drawn = self.cards[0]
+        self.cards = self.cards[1:]
+        return drawn
+
+    def draw_many(self, cards_num):
+        if cards_num > len(self.cards):
+            raise DeckOverDrawException()
+
         drawn_cards = self.cards[:cards_num]
         self.cards = self.cards[cards_num:]
-        if cards_num == 1:
-            return drawn_cards[0]
-        else:
-            return drawn_cards
+        return drawn_cards
 
     def add(self, card, to_top=False):
         if to_top:

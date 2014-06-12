@@ -5,4 +5,4 @@ from gin.player import GinPlayer
 
 class LocalRemoteGinController(GinController):
     def get_players(self, deck):
-        return (GinPlayer(deck.draw(11), 1), RemoteGinPlayer(deck.draw(11), 2))
+        return (GinPlayer(deck.draw_many(11), 1), RemoteGinPlayer(deck.draw_many(11), 2))
