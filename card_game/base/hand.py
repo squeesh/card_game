@@ -28,5 +28,5 @@ class Hand(object):
         return self.cards.pop(pos)
 
     def move(self, pos_a, pos_b):
-        self.cards[pos_b], self.cards[pos_a] = self.cards[pos_a], self.cards[pos_b]
-
+        curr_card = self.cards.pop(pos_a)
+        self.cards.insert(pos_b, curr_card)
