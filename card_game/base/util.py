@@ -3,7 +3,7 @@ from itertools import chain
 
 
 def bridge_shuffle(cards, **kwargs):
-    half = len(cards)//2
+    half = len(cards)//2 # Cut's shouldn't be perfect halvs
 
     stacks = [cards[:half], cards[half:]]
     draw_order = []
@@ -11,6 +11,9 @@ def bridge_shuffle(cards, **kwargs):
 
     for i in range(len(cards)):
         draw_order.append(int(random() * 2))
+        # This may be too random and not enough shuffle like
+        # TODO: We should give a lowering probabilty of additional cards "sticking" together
+        # Trying to mimick the reality of card shuffling, and not the randomness of a computer
 
     for i in draw_order:
         if len(stacks[i]):

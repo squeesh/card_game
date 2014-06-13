@@ -1,32 +1,13 @@
-import pickle
-
 from django.http import HttpResponse, HttpResponseRedirect
-
-from core.models import Game
 
 from card_game.gin.web.controller import WebGinController as Controller
 
+from core.models import Game
+from core.decorators import manage_controller
 
-def obj_to_string(obj):
-    byte_data = pickle.dumps(obj)
-    hex_string = hex(int.from_bytes(byte_data, byteorder='big'))
-    return hex_string
-
-def string_to_obj(string):
-    int_data = int(string, 16)
-    byte_data = int_data.to_bytes((int_data.bit_length() // 8), byteorder='big')
-    return pickle.loads(byte_data)
-
-def index(request):
-    db_game = request.user.games.get()
-    ctrl = string_to_obj(db_game.data)
-    player = ctrl.get_player_for_user(request.user)
-
-    return HttpResponse('{}'.format(player.hand.cards))
 
 def join_game(request, game_id):
     db_game = Game.objects.get(id=game_id)
-    print(db_game.players.count())
 
     assert db_game.players.count() < 2
 
@@ -40,7 +21,7 @@ def join_game(request, game_id):
     ctrl.players[0].user = player_1
     ctrl.players[1].user = request.user
 
-    db_game.data = obj_to_string(ctrl)
+    db_game.set_controller(ctrl)
     db_game.save()
 
     return HttpResponseRedirect('/')
@@ -51,3 +32,24 @@ def create_game(request):
     db_game = request.user.games.create()
 
     return HttpResponse('{}'.format(db_game.id))
+
+@manage_controller
+def index(request, ctrl):
+    player = request.user.player
+    return HttpResponse('{}'.format(player.hand.cards))
+
+@manage_controller
+def view_hand(request, ctrl):
+    player = request.user.player
+    return HttpResponse('{}'.format(player.hand.cards))
+
+@manage_controller
+def draw_deck(request, ctrl):
+    drawn = request.user.player.draw_deck()
+    return HttpResponse('{}'.format(drawn))
+
+@manage_controller
+def draw_pile(request, ctrl):
+    drawn = request.user.player.draw_pile()
+    return HttpResponse('{}'.format(drawn))
+

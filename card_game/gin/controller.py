@@ -30,3 +30,11 @@ class GinController(Controller):
         self.active_player = 0
 
         self.board = GinBoard(self.players, deck)
+
+    def get_deck(self):
+        return self.board.deck
+
+    def get_pile(self):
+        return self.board.pile
+
+
