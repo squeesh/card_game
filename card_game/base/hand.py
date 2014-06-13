@@ -1,4 +1,5 @@
 from base.card import Card
+from base.exceptions import NotEnoughCardsException
 
 
 class Hand(object):
@@ -12,6 +13,8 @@ class Hand(object):
 
     def add(self, cards):
         # if handed a single card
+        # TODO: add_many..?
+        #    shouldn't have different types returned dending on number of cards passed in...
         if isinstance(cards, Card):
             self.cards.append(cards)
         else:
@@ -19,9 +22,11 @@ class Hand(object):
                 self.cards.append(card)
 
     def discard(self, pos):
+        if pos >= len(self.cards):
+            raise NotEnoughCardsException()
+
         return self.cards.pop(pos)
 
     def move(self, pos_a, pos_b):
-        curr_card = self.cards.pop(pos_a)
-        self.cards.insert(pos_b, curr_card)
+        self.cards[pos_b], self.cards[pos_a] = self.cards[pos_a], self.cards[pos_b]
 

@@ -35,13 +35,11 @@ def create_game(request):
 
 @manage_controller
 def index(request, ctrl):
-    player = request.user.player
-    return HttpResponse('{}'.format(player.hand.cards))
+    return HttpResponse('{}'.format(request.user.player.hand.cards))
 
 @manage_controller
 def view_hand(request, ctrl):
-    player = request.user.player
-    return HttpResponse('{}'.format(player.hand.cards))
+    return HttpResponse('{}'.format(request.user.player.hand.cards))
 
 @manage_controller
 def draw_deck(request, ctrl):
@@ -53,3 +51,18 @@ def draw_pile(request, ctrl):
     drawn = request.user.player.draw_pile()
     return HttpResponse('{}'.format(drawn))
 
+@manage_controller
+def discard(request, ctrl, card_pos):
+    card_pos = int(card_pos)
+    discarded = request.user.player.discard(card_pos)
+    return HttpResponse('{}'.format(discarded))
+
+@manage_controller
+def view_pile(request, ctrl):
+    return HttpResponse('{}'.format(ctrl.get_pile().peek()))
+
+@manage_controller
+def card_pos_swap(request, ctrl, pos_a, pos_b):
+    pos_a, pos_b = int(pos_a), int(pos_b)
+    request.user.player.hand.move(pos_a, pos_b)
+    return HttpResponse('{}'.format(request.user.player.hand.cards))

@@ -1,5 +1,5 @@
 class InputValidationException(Exception):
     pass
 
-class DeckOverDrawException(Exception):
+class NotEnoughCardsException(Exception):
     pass

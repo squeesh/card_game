@@ -16,3 +16,11 @@ class GinPlayer(Player):
     def draw_pile(self):
         ctrl = Controller.get()
         return self.draw(ctrl.get_pile())
+
+    def discard(self, pos):
+        ctrl = Controller.get()
+
+        discard = self.hand.discard(pos)
+        ctrl.board.pile.add(discard, to_top=True)
+
+        return discard

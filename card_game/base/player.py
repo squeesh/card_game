@@ -28,12 +28,7 @@ class Player(object):
         return drawn
 
     def discard(self, pos):
-        ctrl = Controller.get()
-
-        discard = self.hand.discard(pos)
-        ctrl.board.pile.add(discard, to_top=True)
-
-        return discard
+        raise NotImplementedError
 
     def process_input(self):
         self.input.process()

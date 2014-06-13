@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from random import random
 
-from base.exceptions import DeckOverDrawException
+from base.exceptions import NotEnoughCardsException
 from base.util import bridge_shuffle, cut_deck
 
 
@@ -40,7 +40,7 @@ class Deck(object, metaclass=ABCMeta):
 
     def draw(self):
         if not len(self.cards):
-            raise DeckOverDrawException()
+            raise NotEnoughCardsException()
 
         drawn = self.cards[0]
         self.cards = self.cards[1:]
@@ -48,7 +48,7 @@ class Deck(object, metaclass=ABCMeta):
 
     def draw_many(self, cards_num):
         if cards_num > len(self.cards):
-            raise DeckOverDrawException()
+            raise NotEnoughCardsException()
 
         drawn_cards = self.cards[:cards_num]
         self.cards = self.cards[cards_num:]
@@ -59,3 +59,9 @@ class Deck(object, metaclass=ABCMeta):
             self.cards.insert(0, card)
         else:
             self.cards.append(card)
+
+    def peek(self, top=True):
+        if not len(self.cards):
+            return None
+
+        return self.cards[0 if top else 0]

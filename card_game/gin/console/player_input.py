@@ -2,7 +2,7 @@ import re
 import sys
 
 from base.controller import Controller
-from base.exceptions import InputValidationException, DeckOverDrawException
+from base.exceptions import InputValidationException, NotEnoughCardsException
 from base.player_input import PlayerInput
 
 
@@ -50,14 +50,14 @@ exit | Exit game
                 try:
                     drawn = self.player.draw(ctrl.board.deck)
                     self.print_data('You drew: ', drawn)
-                except DeckOverDrawException:
+                except NotEnoughCardsException:
                     self.print_data('Error: Pile empty')
 
             elif re.match('^4$', data):
                 try:
                     drawn = self.player.draw(ctrl.board.pile)
                     self.print_data('You drew: ', drawn)
-                except DeckOverDrawException:
+                except NotEnoughCardsException:
                     self.print_data('Error: Pile empty')
 
             elif re.match('^5 \d+ \d+$', data):

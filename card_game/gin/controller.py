@@ -36,5 +36,3 @@ class GinController(Controller):
 
     def get_pile(self):
         return self.board.pile
-
-
