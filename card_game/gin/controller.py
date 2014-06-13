@@ -19,14 +19,14 @@ class GinController(Controller):
 
     SUITS = (HEART, DIAMOND, CLUB, SPADE)
 
-    def get_players(self, deck):
+    def get_new_players(self, deck):
         raise NotImplementedError
 
     def create_game(self):
         deck = GinDeck()
         deck.shuffle_well()
 
-        self.players = self.get_players(deck)
+        self.players = self.get_new_players(deck)
         self.active_player = 0
 
         self.board = GinBoard(self.players, deck)

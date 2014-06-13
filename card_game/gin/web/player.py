@@ -5,5 +5,6 @@ from gin.multiplayer.player_input import RemoteConsoleGinPlayerInput
 
 
 class WebGinPlayer(Player):
+    user = None
     HandClass = GinHand
     InputClass = RemoteConsoleGinPlayerInput

@@ -14,7 +14,7 @@ class LocalRemoteGinController(GinController):
         super(LocalRemoteGinController, self).__init__(*args, **kwargs)
         self.active_connections = []
 
-    def get_players(self, deck):
+    def get_new_players(self, deck):
         return (GinPlayer(deck.draw_many(11), 1), RemoteGinPlayer(deck.draw_many(11), 2))
 
     def exit_game(self):
