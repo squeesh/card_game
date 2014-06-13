@@ -8,18 +8,15 @@ class Controller(object, metaclass=ABCMeta):
     players         = None
     active_player   = None
 
-    force_exit          = False
-    active_connections  = None
+    force_exit      = False
 
     COMMANDS = {
         'NO_ACTION': '0',
         'GET_INPUT': '1',
-        'KILL_CONN': '2',
     }
 
     def __init__(self):
         assert not self._ctrl
-        self.active_connections = []
 
     @classmethod
     def get(cls):
@@ -44,12 +41,6 @@ class Controller(object, metaclass=ABCMeta):
         self.exit_game()
 
     def exit_game(self):
-        for conn in self.active_connections:
-            data_dict = {
-                'data': '',
-                'command': self.COMMANDS['KILL_CONN'],
-            }
+        pass
 
-            data = pickle.dumps(data_dict)
-            conn.sendall(data)
-            conn.close()
+

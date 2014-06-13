@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from random import random
 
-from card_game.base.exceptions import DeckOverDrawException
+from base.exceptions import DeckOverDrawException
 from base.util import bridge_shuffle, cut_deck
 
 

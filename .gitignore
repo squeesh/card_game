@@ -5,4 +5,4 @@ __pycache__
 # sublime
 *.sublime*
 
-venv/
+db.sqlite3
