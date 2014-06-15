@@ -1,6 +1,7 @@
 import json
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 
 from gin.web.controller import WebGinController as Controller
 from gin.card import GinCard
@@ -57,7 +58,8 @@ def create_game(request):
 
 @manage_controller
 def index(request, ctrl):
-    return HttpResponse(json.dumps(request.user.player.hand.cards, cls=GinEncoder))
+    # return HttpResponse(json.dumps(request.user.player.hand.cards, cls=GinEncoder))
+    return render(request, 'core/index.htm')
 
 @manage_controller
 def view_hand(request, ctrl):
