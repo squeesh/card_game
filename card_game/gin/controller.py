@@ -6,16 +6,21 @@ from gin.deck import GinDeck
 from gin.board import GinBoard
 
 class GinController(Controller):
-    if platform.system() == 'Windows':
-        HEART   = chr(3)
-        DIAMOND = chr(4)
-        CLUB    = chr(5)
-        SPADE   = chr(6)
-    else:
-        HEART   = '♥'
-        DIAMOND = '♦'
-        CLUB    = '♣'
-        SPADE   = '♠'
+    # if platform.system() == 'Windows':
+    #     HEART   = chr(3)
+    #     DIAMOND = chr(4)
+    #     CLUB    = chr(5)
+    #     SPADE   = chr(6)
+    # else:
+    #     HEART   = '♥'
+    #     DIAMOND = '♦'
+    #     CLUB    = '♣'
+    #     SPADE   = '♠'
+
+    HEART   = 'hearts'
+    DIAMOND = 'diamonds'
+    CLUB    = 'clubs'
+    SPADE   = 'spades'
 
     SUITS = (HEART, DIAMOND, CLUB, SPADE)
 
