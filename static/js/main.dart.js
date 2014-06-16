@@ -6220,7 +6220,7 @@ var $$ = {};
     ctx = J.get$context2D$x(ctrl.canvas);
     t2 = J.get$onMouseMove$x(ctrl.canvas);
     H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.main_closure0(t1, ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
-    W.HttpRequest_getString("http://192.168.1.200:8000/hand/", null, null).then$1(new F.main_closure1());
+    W.HttpRequest_getString("http://96.228.188.123:8000/hand/", null, null).then$1(new F.main_closure1());
     old_now = new P.DateTime(Date.now(), false);
     old_now.DateTime$_now$0();
     t1.old_now_2 = old_now;

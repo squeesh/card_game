@@ -59,7 +59,9 @@ void main() {
 //  request.send();
   //window.alert(request.toString());
   
-  HttpRequest.getString("http://192.168.1.200:8000/hand/")
+//  HttpRequest request = new HttpRequest();
+//  request.timeout = 0;
+  HttpRequest.getString("http://96.228.188.123:8000/hand/")
       .then((String fileContents) {
         print(fileContents.toString());
         
