@@ -1679,6 +1679,11 @@ var $$ = {};
     }
     throw H.wrapException(P.RangeError$range(charCode, 0, 1114111));
   },
+  Primitives_lazyAsJsDate: function(receiver) {
+    if (receiver.date === void 0)
+      receiver.date = new Date(receiver.millisecondsSinceEpoch);
+    return receiver.date;
+  },
   Primitives_getProperty: function(object, key) {
     if (object == null || typeof object === "boolean" || typeof object === "number" || typeof object === "string")
       throw H.wrapException(P.ArgumentError$(object));
@@ -2808,48 +2813,34 @@ var $$ = {};
 ["card", "card.dart", , G, {
   "^": "",
   Card: {
-    "^": "Object;x>,y>,HALF_WIDTH,HALF_HEIGHT,value,suit",
+    "^": "Object;x>,y>,highlight?,HALF_WIDTH,HALF_HEIGHT,value,suit",
     render$1: function(ctx) {
-      var ctrl, t1, t2, t3, t4, t5, t6, t7;
-      ctrl = F.Controller_get();
-      t1 = ctrl.mouse_x;
-      t2 = ctrl.mouse_y;
-      t3 = this.x;
-      t4 = this.HALF_WIDTH;
-      t5 = t3 - t4;
-      if (typeof t1 !== "number")
-        return t1.$gt();
-      if (t1 > t5)
-        if (t1 < t3 + t4) {
-          t1 = this.y;
-          t6 = this.HALF_HEIGHT;
-          if (typeof t1 !== "number")
-            return t1.$sub();
-          if (typeof t2 !== "number")
-            return t2.$gt();
-          t1 = t2 > t1 - t6 && t2 < t1 + t6;
-        } else
-          t1 = false;
-      else
-        t1 = false;
-      if (t1)
+      var offset, t1, t2, t3, t4, t5, t6, t7;
+      F.Controller_get();
+      if (this.highlight) {
         ctx.fillStyle = "#00ff00";
-      else
+        offset = 30;
+      } else {
         ctx.fillStyle = "#ff0000";
-      t1 = this.y;
-      t2 = this.HALF_HEIGHT;
-      if (typeof t1 !== "number")
-        return t1.$sub();
-      t6 = t1 - t2;
-      t4 *= 2;
-      t7 = t2 * 2;
-      ctx.fillRect(t5, t6, t4, t7);
+        offset = 0;
+      }
+      t1 = this.x;
+      t2 = this.HALF_WIDTH;
+      t3 = t1 - t2;
+      t4 = this.y;
+      t5 = this.HALF_HEIGHT;
+      if (typeof t4 !== "number")
+        return t4.$sub();
+      t6 = t4 - t5 - offset;
+      t2 *= 2;
+      t7 = t5 * 2;
+      ctx.fillRect(t3, t6, t2, t7);
       ctx.strokeStyle = "#000000";
-      ctx.strokeRect(t5, t6, t4, t7);
+      ctx.strokeRect(t3, t6, t2, t7);
       ctx.fillStyle = "#000000";
       ctx.font = "20px Georgia";
       ctx.textAlign = "center";
-      C.CanvasRenderingContext2D_methods.fillText$3(ctx, J.$add$ns(this.value, this.suit), t3, t1 - t2 / 2);
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, J.$add$ns(this.value, this.suit), t1, t4 - t5 / 2 - offset);
     }
   }
 }],
@@ -3033,13 +3024,6 @@ var $$ = {};
       return errorHandler;
     }
   },
-  Future_Future$delayed: function(duration, computation) {
-    var completer, result;
-    completer = H.setRuntimeTypeInfo(new P._SyncCompleter(P._Future$(null)), [null]);
-    result = completer.future.then$1(new P.Future_Future$delayed_closure(computation));
-    P.Timer_Timer(duration, new P.Future_Future$delayed_closure0(completer));
-    return result;
-  },
   _asyncRunCallbackLoop: function() {
     var entry = $._nextCallback;
     for (; entry != null;) {
@@ -3166,21 +3150,6 @@ var $$ = {};
   _AsyncError: {
     "^": "Object;error>,stackTrace<",
     $isError: true
-  },
-  Future_Future$delayed_closure: {
-    "^": "Closure:8;computation_0",
-    call$1: function(ignored) {
-      return this.computation_0.call$0();
-    }
-  },
-  Future_Future$delayed_closure0: {
-    "^": "Closure:6;completer_1",
-    call$0: function() {
-      var t1 = this.completer_1.future;
-      if (t1._state !== 0)
-        H.throwExpression(P.StateError$("Future already completed"));
-      t1._complete$1(null);
-    }
   },
   _Completer: {
     "^": "Object;"
@@ -5209,6 +5178,60 @@ var $$ = {};
     $isbool: true
   },
   "+bool": 0,
+  DateTime: {
+    "^": "Object;millisecondsSinceEpoch,isUtc",
+    $eq: function(_, other) {
+      if (other == null)
+        return false;
+      if (!J.getInterceptor(other).$isDateTime)
+        return false;
+      return this.millisecondsSinceEpoch === other.millisecondsSinceEpoch && this.isUtc === other.isUtc;
+    },
+    get$hashCode: function(_) {
+      return this.millisecondsSinceEpoch;
+    },
+    toString$0: function(_) {
+      var t1, y, m, d, h, min, sec, ms;
+      t1 = this.isUtc;
+      y = P.DateTime__fourDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCFullYear() + 0 : H.Primitives_lazyAsJsDate(this).getFullYear() + 0);
+      m = P.DateTime__twoDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCMonth() + 1 : H.Primitives_lazyAsJsDate(this).getMonth() + 1);
+      d = P.DateTime__twoDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCDate() + 0 : H.Primitives_lazyAsJsDate(this).getDate() + 0);
+      h = P.DateTime__twoDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCHours() + 0 : H.Primitives_lazyAsJsDate(this).getHours() + 0);
+      min = P.DateTime__twoDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCMinutes() + 0 : H.Primitives_lazyAsJsDate(this).getMinutes() + 0);
+      sec = P.DateTime__twoDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCSeconds() + 0 : H.Primitives_lazyAsJsDate(this).getSeconds() + 0);
+      ms = P.DateTime__threeDigits(t1 ? H.Primitives_lazyAsJsDate(this).getUTCMilliseconds() + 0 : H.Primitives_lazyAsJsDate(this).getMilliseconds() + 0);
+      if (t1)
+        return y + "-" + m + "-" + d + " " + h + ":" + min + ":" + sec + "." + ms + "Z";
+      else
+        return y + "-" + m + "-" + d + " " + h + ":" + min + ":" + sec + "." + ms;
+    },
+    DateTime$_now$0: function() {
+      H.Primitives_lazyAsJsDate(this);
+    },
+    $isDateTime: true,
+    static: {"^": "DateTime_MONDAY,DateTime_TUESDAY,DateTime_WEDNESDAY,DateTime_THURSDAY,DateTime_FRIDAY,DateTime_SATURDAY,DateTime_SUNDAY,DateTime_DAYS_PER_WEEK,DateTime_JANUARY,DateTime_FEBRUARY,DateTime_MARCH,DateTime_APRIL,DateTime_MAY,DateTime_JUNE,DateTime_JULY,DateTime_AUGUST,DateTime_SEPTEMBER,DateTime_OCTOBER,DateTime_NOVEMBER,DateTime_DECEMBER,DateTime_MONTHS_PER_YEAR,DateTime__MAX_MILLISECONDS_SINCE_EPOCH", DateTime__fourDigits: function(n) {
+        var absN, sign;
+        absN = Math.abs(n);
+        sign = n < 0 ? "-" : "";
+        if (absN >= 1000)
+          return "" + n;
+        if (absN >= 100)
+          return sign + "0" + H.S(absN);
+        if (absN >= 10)
+          return sign + "00" + H.S(absN);
+        return sign + "000" + H.S(absN);
+      }, DateTime__threeDigits: function(n) {
+        if (n >= 100)
+          return "" + n;
+        if (n >= 10)
+          return "0" + n;
+        return "00" + n;
+      }, DateTime__twoDigits: function(n) {
+        if (n >= 10)
+          return "" + n;
+        return "0" + n;
+      }}
+  },
   $double: {
     "^": "num;"
   },
@@ -6171,15 +6194,16 @@ var $$ = {};
     throw "Unable to print message: " + String(string);
   }
 }],
-["", "dart_test.dart", , N, {
+["", "main.dart", , F, {
   "^": "",
   main: [function() {
-    var t1, ctrl, t2, t3, ctx;
+    var t1, ctrl, t2, t3, ctx, old_now;
     t1 = {};
     ctrl = F.Controller_get();
     t2 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new N.main_closure(ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.main_closure(ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
     t1.display_data_0 = "test";
+    t1.display_fps_1 = "";
     ctrl.mouse_x = 0;
     ctrl.mouse_y = 0;
     t2 = document.querySelector("#draw > canvas");
@@ -6195,9 +6219,13 @@ var $$ = {};
     J.set$height$x(t3, t2 - 5);
     ctx = J.get$context2D$x(ctrl.canvas);
     t2 = J.get$onMouseMove$x(ctrl.canvas);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new N.main_closure0(t1, ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
-    W.HttpRequest_getString("http://192.168.1.200:8000/hand/", null, null).then$1(new N.main_closure1());
-    C.Window_methods.get$animationFrame(window).then$1(new N.main_draw(t1, ctrl, ctx));
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.main_closure0(t1, ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
+    W.HttpRequest_getString("http://192.168.1.200:8000/hand/", null, null).then$1(new F.main_closure1());
+    old_now = new P.DateTime(Date.now(), false);
+    old_now.DateTime$_now$0();
+    t1.old_now_2 = old_now;
+    t1.frames_3 = 0;
+    C.Window_methods.get$animationFrame(window).then$1(new F.main_draw(t1, ctrl, ctx));
   }, "call$0", "main$closure", 0, 0, 1],
   load_cards: function(data_json) {
     var ctrl, t1, cards_num, i, data, t2, y, t3;
@@ -6214,14 +6242,13 @@ var $$ = {};
         return t2.$div();
       y = J.get$height$x(ctrl.canvas);
       t3 = J.getInterceptor$asx(data);
-      $.get$cards().push(new G.Card(t2 / (cards_num + 1), y, 100, 150, t3.$index(data, "value"), t3.$index(data, "suit")));
+      $.get$cards().push(new G.Card(t2 / (cards_num + 1), y, false, 100, 150, t3.$index(data, "value"), t3.$index(data, "suit")));
     }
   },
   main_closure: {
     "^": "Closure:8;ctrl_1",
     call$1: function(e) {
       var t1, t2, t3;
-      P.print("resize...");
       t1 = this.ctrl_1;
       t2 = t1.canvas;
       t3 = window.innerWidth;
@@ -6238,7 +6265,7 @@ var $$ = {};
   main_closure0: {
     "^": "Closure:19;box_0,ctrl_2",
     call$1: function($event) {
-      var t1, t2, t3;
+      var t1, t2, t3, i, t4, t5, t6;
       t1 = this.ctrl_2;
       t2 = J.getInterceptor$x($event);
       t3 = t2.get$client($event);
@@ -6247,6 +6274,40 @@ var $$ = {};
       t2 = t2.get$y(t2);
       t1.mouse_y = t2;
       this.box_0.display_data_0 = H.S(t1.mouse_x) + " | " + H.S(t2);
+      for (t2 = $.get$cards(), t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
+        t2._current.set$highlight(false);
+      for (i = $.get$cards().length - 1; i >= 0; --i) {
+        t2 = $.get$cards();
+        if (i >= t2.length)
+          return H.ioore(t2, i);
+        t2 = t2[i];
+        t3 = t1.mouse_x;
+        t4 = t1.mouse_y;
+        t5 = t2.x;
+        t6 = t2.HALF_WIDTH;
+        if (typeof t3 !== "number")
+          return t3.$gt();
+        if (t3 > t5 - t6)
+          if (t3 < t5 + t6) {
+            t3 = t2.y;
+            t2 = t2.HALF_HEIGHT;
+            if (typeof t3 !== "number")
+              return t3.$sub();
+            if (typeof t4 !== "number")
+              return t4.$gt();
+            t2 = t4 > t3 - t2 && t4 < t3 + t2;
+          } else
+            t2 = false;
+        else
+          t2 = false;
+        if (t2) {
+          t1 = $.get$cards();
+          if (i >= t1.length)
+            return H.ioore(t1, i);
+          t1[i].highlight = true;
+          break;
+        }
+      }
     }
   },
   main_closure1: {
@@ -6254,13 +6315,15 @@ var $$ = {};
     call$1: function(fileContents) {
       var t1 = J.getInterceptor(fileContents);
       P.print(t1.toString$0(fileContents));
-      N.load_cards(C.JsonCodec_null_null.decode$1(t1.toString$0(fileContents)));
+      F.load_cards(C.JsonCodec_null_null.decode$1(t1.toString$0(fileContents)));
     }
   },
   main_draw: {
     "^": "Closure:20;box_0,ctrl_3,ctx_4",
     call$1: function(num) {
-      var t1, t2;
+      var now, t1, t2, t3;
+      now = new P.DateTime(Date.now(), false);
+      now.DateTime$_now$0();
       t1 = this.ctx_4;
       t1.save();
       t1.setTransform(1, 0, 0, 1, 0, 0);
@@ -6270,16 +6333,18 @@ var $$ = {};
       t1.fillStyle = "#000000";
       t1.font = "20px Georgia";
       t1.textAlign = "left";
-      C.CanvasRenderingContext2D_methods.fillText$3(t1, this.box_0.display_data_0, 10, 30);
-      for (t2 = $.get$cards(), t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
-        t2._current.render$1(t1);
-      P.Future_Future$delayed(C.Duration_50000, new N.main_draw_closure(this));
-    }
-  },
-  main_draw_closure: {
-    "^": "Closure:6;draw_5",
-    call$0: function() {
-      C.Window_methods.get$animationFrame(window).then$1(this.draw_5);
+      t2 = this.box_0;
+      C.CanvasRenderingContext2D_methods.fillText$3(t1, t2.display_data_0, 10, 30);
+      C.CanvasRenderingContext2D_methods.fillText$3(t1, t2.display_fps_1, 10, 50);
+      for (t3 = $.get$cards(), t3 = new H.ListIterator(t3, t3.length, 0, null); t3.moveNext$0();)
+        t3._current.render$1(t1);
+      if (now.millisecondsSinceEpoch - t2.old_now_2.millisecondsSinceEpoch > 1000) {
+        t2.display_fps_1 = "" + t2.frames_3 + " fps";
+        t2.frames_3 = 0;
+        t2.old_now_2 = now;
+      }
+      ++t2.frames_3;
+      C.Window_methods.get$animationFrame(window).then$1(this);
     }
   }
 },
@@ -6483,7 +6548,6 @@ C.C_DynamicRuntimeType = new H.DynamicRuntimeType();
 C.C_OutOfMemoryError = new P.OutOfMemoryError();
 C.C__RootZone = new P._RootZone();
 C.Duration_0 = new P.Duration(0);
-C.Duration_50000 = new P.Duration(50000);
 C.EventStreamProvider_error = new W.EventStreamProvider("error");
 C.EventStreamProvider_load = new W.EventStreamProvider("load");
 C.EventStreamProvider_mousemove = new W.EventStreamProvider("mousemove");
@@ -6849,11 +6913,11 @@ init.dispatchPropertyName = init.getIsolateTag("dispatch_record");
 
   if (typeof dartMainRunner === "function") {
     dartMainRunner((function(a) {
-  H.startRootIsolate(N.main$closure(), a);
+  H.startRootIsolate(F.main$closure(), a);
 }), []);
   } else {
     (function(a) {
-  H.startRootIsolate(N.main$closure(), a);
+  H.startRootIsolate(F.main$closure(), a);
 })([]);
   }
 });
@@ -10395,9 +10459,10 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   initHooks_closure1.prototype = $desc;
-  function Card(x, y, HALF_WIDTH, HALF_HEIGHT, value, suit) {
+  function Card(x, y, highlight, HALF_WIDTH, HALF_HEIGHT, value, suit) {
     this.x = x;
     this.y = y;
+    this.highlight = highlight;
     this.HALF_WIDTH = HALF_WIDTH;
     this.HALF_HEIGHT = HALF_HEIGHT;
     this.value = value;
@@ -10415,6 +10480,9 @@ function dart_precompiled($collectedClasses) {
   };
   Card.prototype.get$y = function(receiver) {
     return this.y;
+  };
+  Card.prototype.set$highlight = function(v) {
+    return this.highlight = v;
   };
   function Controller(mouse_x, mouse_y, canvas) {
     this.mouse_x = mouse_x;
@@ -10511,26 +10579,6 @@ function dart_precompiled($collectedClasses) {
   _AsyncError.prototype.get$stackTrace = function() {
     return this.stackTrace;
   };
-  function Future_Future$delayed_closure(computation_0) {
-    this.computation_0 = computation_0;
-  }
-  Future_Future$delayed_closure.builtin$cls = "Future_Future$delayed_closure";
-  if (!"name" in Future_Future$delayed_closure)
-    Future_Future$delayed_closure.name = "Future_Future$delayed_closure";
-  $desc = $collectedClasses.Future_Future$delayed_closure;
-  if ($desc instanceof Array)
-    $desc = $desc[1];
-  Future_Future$delayed_closure.prototype = $desc;
-  function Future_Future$delayed_closure0(completer_1) {
-    this.completer_1 = completer_1;
-  }
-  Future_Future$delayed_closure0.builtin$cls = "Future_Future$delayed_closure0";
-  if (!"name" in Future_Future$delayed_closure0)
-    Future_Future$delayed_closure0.name = "Future_Future$delayed_closure0";
-  $desc = $collectedClasses.Future_Future$delayed_closure0;
-  if ($desc instanceof Array)
-    $desc = $desc[1];
-  Future_Future$delayed_closure0.prototype = $desc;
   function _Completer() {
   }
   _Completer.builtin$cls = "_Completer";
@@ -11283,6 +11331,17 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   bool.prototype = $desc;
+  function DateTime(millisecondsSinceEpoch, isUtc) {
+    this.millisecondsSinceEpoch = millisecondsSinceEpoch;
+    this.isUtc = isUtc;
+  }
+  DateTime.builtin$cls = "DateTime";
+  if (!"name" in DateTime)
+    DateTime.name = "DateTime";
+  $desc = $collectedClasses.DateTime;
+  if ($desc instanceof Array)
+    $desc = $desc[1];
+  DateTime.prototype = $desc;
   function $double() {
   }
   $double.builtin$cls = "$double";
@@ -11779,15 +11838,5 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   main_draw.prototype = $desc;
-  function main_draw_closure(draw_5) {
-    this.draw_5 = draw_5;
-  }
-  main_draw_closure.builtin$cls = "main_draw_closure";
-  if (!"name" in main_draw_closure)
-    main_draw_closure.name = "main_draw_closure";
-  $desc = $collectedClasses.main_draw_closure;
-  if ($desc instanceof Array)
-    $desc = $desc[1];
-  main_draw_closure.prototype = $desc;
-  return [HtmlElement, AnchorElement, AnimationEvent, AreaElement, AudioElement, AutocompleteErrorEvent, BRElement, BaseElement, BeforeLoadEvent, BeforeUnloadEvent, BodyElement, ButtonElement, CanvasElement, CanvasGradient, CanvasPattern, CanvasRenderingContext, CanvasRenderingContext2D, CloseEvent, CompositionEvent, ContentElement, CssFontFaceLoadEvent, CustomEvent, DListElement, DataListElement, DetailsElement, DeviceMotionEvent, DeviceOrientationEvent, DialogElement, DivElement, Document, DomError, DomException, Element, EmbedElement, ErrorEvent, Event, EventTarget, FieldSetElement, FileError, FocusEvent, FormElement, HRElement, HashChangeEvent, HeadElement, HeadingElement, HtmlDocument, HtmlHtmlElement, HttpRequest, HttpRequestEventTarget, IFrameElement, ImageElement, InputElement, InstallEvent, InstallPhaseEvent, KeyboardEvent, KeygenElement, LIElement, LabelElement, LegendElement, LinkElement, MapElement, MediaElement, MediaError, MediaKeyError, MediaKeyEvent, MediaKeyMessageEvent, MediaKeyNeededEvent, MediaStreamEvent, MediaStreamTrackEvent, MenuElement, MessageEvent, MetaElement, MeterElement, MidiConnectionEvent, MidiMessageEvent, ModElement, MouseEvent, Navigator, NavigatorUserMediaError, Node, OListElement, ObjectElement, OptGroupElement, OptionElement, OutputElement, OverflowEvent, PageTransitionEvent, ParagraphElement, ParamElement, PopStateEvent, PositionError, PreElement, ProgressElement, ProgressEvent, QuoteElement, ResourceProgressEvent, RtcDataChannelEvent, RtcDtmfToneChangeEvent, RtcIceCandidateEvent, ScriptElement, SecurityPolicyViolationEvent, SelectElement, ShadowElement, SourceElement, SpanElement, SpeechInputEvent, SpeechRecognitionError, SpeechRecognitionEvent, SpeechSynthesisEvent, StorageEvent, StyleElement, TableCaptionElement, TableCellElement, TableColElement, TableElement, TableRowElement, TableSectionElement, TemplateElement, TextAreaElement, TextEvent, TitleElement, TouchEvent, TrackElement, TrackEvent, TransitionEvent, UIEvent, UListElement, UnknownElement, VideoElement, WheelEvent, Window, _HTMLAppletElement, _HTMLDirectoryElement, _HTMLFontElement, _HTMLFrameElement, _HTMLFrameSetElement, _HTMLMarqueeElement, _MutationEvent, _XMLHttpRequestProgressEvent, VersionChangeEvent, AElement, AltGlyphElement, AnimateElement, AnimateMotionElement, AnimateTransformElement, AnimatedLength, AnimatedLengthList, AnimatedNumber, AnimatedNumberList, AnimationElement, CircleElement, ClipPathElement, DefsElement, DescElement, DiscardElement, EllipseElement, FEBlendElement, FEColorMatrixElement, FEComponentTransferElement, FECompositeElement, FEConvolveMatrixElement, FEDiffuseLightingElement, FEDisplacementMapElement, FEDistantLightElement, FEFloodElement, FEFuncAElement, FEFuncBElement, FEFuncGElement, FEFuncRElement, FEGaussianBlurElement, FEImageElement, FEMergeElement, FEMergeNodeElement, FEMorphologyElement, FEOffsetElement, FEPointLightElement, FESpecularLightingElement, FESpotLightElement, FETileElement, FETurbulenceElement, FilterElement, ForeignObjectElement, GElement, GeometryElement, GraphicsElement, ImageElement0, LineElement, LinearGradientElement, MarkerElement, MaskElement, MetadataElement, PathElement, PatternElement, PolygonElement, PolylineElement, RadialGradientElement, RectElement, ScriptElement0, SetElement, StopElement, StyleElement0, SvgElement, SvgSvgElement, SwitchElement, SymbolElement, TSpanElement, TextContentElement, TextElement, TextPathElement, TextPositioningElement, TitleElement0, UseElement, ViewElement, ZoomEvent, _GradientElement, _SVGAltGlyphDefElement, _SVGAltGlyphItemElement, _SVGComponentTransferFunctionElement, _SVGCursorElement, _SVGFEDropShadowElement, _SVGFontElement, _SVGFontFaceElement, _SVGFontFaceFormatElement, _SVGFontFaceNameElement, _SVGFontFaceSrcElement, _SVGFontFaceUriElement, _SVGGlyphElement, _SVGGlyphRefElement, _SVGHKernElement, _SVGMPathElement, _SVGMissingGlyphElement, _SVGVKernElement, AudioProcessingEvent, OfflineAudioCompletionEvent, ContextEvent, SqlError, NativeTypedData, NativeUint8List, JS_CONST, Interceptor, JSBool, JSNull, JavaScriptObject, PlainJavaScriptObject, UnknownJavaScriptObject, JSArray, JSNumber, JSInt, JSDouble, JSString, startRootIsolate_closure, startRootIsolate_closure0, _Manager, _IsolateContext, _IsolateContext_handlePing_respond, _EventLoop, _EventLoop__runHelper_next, _IsolateEvent, _MainManagerStub, IsolateNatives__processWorkerMessage_closure, IsolateNatives__startIsolate_runStartFunction, _BaseSendPort, _NativeJsSendPort, _NativeJsSendPort_send_closure, _WorkerSendPort, RawReceivePortImpl, _JsSerializer, _JsCopier, _JsDeserializer, _JsVisitedMap, _MessageTraverserVisitedMap, _MessageTraverser, _Copier, _Copier_visitMap_closure, _Serializer, _Deserializer, TimerImpl, TimerImpl_internalCallback, TimerImpl_internalCallback0, CapabilityImpl, ReflectionInfo, TypeErrorDecoder, NullError, JsNoSuchMethodError, UnknownJsTypeError, unwrapException_saveStackTrace, _StackTrace, invokeClosure_closure, invokeClosure_closure0, invokeClosure_closure1, invokeClosure_closure2, invokeClosure_closure3, Closure, TearOffClosure, BoundClosure, RuntimeError, RuntimeType, RuntimeFunctionType, DynamicRuntimeType, initHooks_closure, initHooks_closure0, initHooks_closure1, Card, Controller, ListIterator, MappedIterable, EfficientLengthMappedIterable, MappedIterator, FixedLengthListMixin, _AsyncRun__scheduleImmediateJsOverride_internalCallback, _AsyncError, Future_Future$delayed_closure, Future_Future$delayed_closure0, _Completer, _AsyncCompleter, _SyncCompleter, _Future, _Future__addListener_closure, _Future__chainForeignFuture_closure, _Future__chainForeignFuture_closure0, _Future__asyncComplete_closure0, _Future__asyncComplete_closure, _Future__asyncCompleteError_closure, _Future__propagateToListeners_handleValueCallback, _Future__propagateToListeners_handleError, _Future__propagateToListeners_handleWhenCompleteCallback, _Future__propagateToListeners_handleWhenCompleteCallback_closure, _Future__propagateToListeners_handleWhenCompleteCallback_closure0, _AsyncCallbackEntry, Stream, Stream_forEach_closure, Stream_forEach__closure, Stream_forEach__closure0, Stream_forEach_closure0, Stream_length_closure, Stream_length_closure0, StreamSubscription, _EventSink, _cancelAndError_closure, _cancelAndErrorClosure_closure, _BaseZone, _BaseZone_bindCallback_closure, _BaseZone_bindCallback_closure0, _BaseZone_bindUnaryCallback_closure, _BaseZone_bindUnaryCallback_closure0, _rootHandleUncaughtError_closure, _rootHandleUncaughtError__closure, _RootZone, _HashMap, _HashMap_values_closure, HashMapKeyIterable, HashMapKeyIterator, _LinkedHashMap, _LinkedHashMap_values_closure, LinkedHashMapCell, LinkedHashMapKeyIterable, LinkedHashMapKeyIterator, _HashSet, _IdentityHashSet, HashSetIterator, _LinkedHashSet, LinkedHashSetCell, LinkedHashSetIterator, _HashSetBase, IterableBase, ListMixin, Maps_mapToString_closure, ListQueue, _ListQueueIterator, _convertJsonToDart_closure, _convertJsonToDart_walk, Codec, Converter, JsonCodec, JsonDecoder, NoSuchMethodError_toString_closure, bool, $double, Duration, Duration_toString_sixDigits, Duration_toString_twoDigits, Error, NullThrownError, ArgumentError, RangeError, UnsupportedError, UnimplementedError, StateError, ConcurrentModificationError, OutOfMemoryError, StackOverflowError, CyclicInitializationError, _ExceptionImplementation, FormatException, Expando, Function, $int, Iterator, List, Null, num, Object, StackTrace, String, StringBuffer, Symbol, HttpRequest_getString_closure, HttpRequest_request_closure0, HttpRequest_request_closure, Window_animationFrame_closure, EventStreamProvider, _EventStream, _ElementEventStreamImpl, _EventStreamSubscription, Capability, Point, _RectangleBase, Rectangle, NativeTypedArray, NativeTypedArrayOfInt, NativeTypedArray_ListMixin, NativeTypedArray_ListMixin_FixedLengthListMixin, main_closure, main_closure0, main_closure1, main_draw, main_draw_closure];
+  return [HtmlElement, AnchorElement, AnimationEvent, AreaElement, AudioElement, AutocompleteErrorEvent, BRElement, BaseElement, BeforeLoadEvent, BeforeUnloadEvent, BodyElement, ButtonElement, CanvasElement, CanvasGradient, CanvasPattern, CanvasRenderingContext, CanvasRenderingContext2D, CloseEvent, CompositionEvent, ContentElement, CssFontFaceLoadEvent, CustomEvent, DListElement, DataListElement, DetailsElement, DeviceMotionEvent, DeviceOrientationEvent, DialogElement, DivElement, Document, DomError, DomException, Element, EmbedElement, ErrorEvent, Event, EventTarget, FieldSetElement, FileError, FocusEvent, FormElement, HRElement, HashChangeEvent, HeadElement, HeadingElement, HtmlDocument, HtmlHtmlElement, HttpRequest, HttpRequestEventTarget, IFrameElement, ImageElement, InputElement, InstallEvent, InstallPhaseEvent, KeyboardEvent, KeygenElement, LIElement, LabelElement, LegendElement, LinkElement, MapElement, MediaElement, MediaError, MediaKeyError, MediaKeyEvent, MediaKeyMessageEvent, MediaKeyNeededEvent, MediaStreamEvent, MediaStreamTrackEvent, MenuElement, MessageEvent, MetaElement, MeterElement, MidiConnectionEvent, MidiMessageEvent, ModElement, MouseEvent, Navigator, NavigatorUserMediaError, Node, OListElement, ObjectElement, OptGroupElement, OptionElement, OutputElement, OverflowEvent, PageTransitionEvent, ParagraphElement, ParamElement, PopStateEvent, PositionError, PreElement, ProgressElement, ProgressEvent, QuoteElement, ResourceProgressEvent, RtcDataChannelEvent, RtcDtmfToneChangeEvent, RtcIceCandidateEvent, ScriptElement, SecurityPolicyViolationEvent, SelectElement, ShadowElement, SourceElement, SpanElement, SpeechInputEvent, SpeechRecognitionError, SpeechRecognitionEvent, SpeechSynthesisEvent, StorageEvent, StyleElement, TableCaptionElement, TableCellElement, TableColElement, TableElement, TableRowElement, TableSectionElement, TemplateElement, TextAreaElement, TextEvent, TitleElement, TouchEvent, TrackElement, TrackEvent, TransitionEvent, UIEvent, UListElement, UnknownElement, VideoElement, WheelEvent, Window, _HTMLAppletElement, _HTMLDirectoryElement, _HTMLFontElement, _HTMLFrameElement, _HTMLFrameSetElement, _HTMLMarqueeElement, _MutationEvent, _XMLHttpRequestProgressEvent, VersionChangeEvent, AElement, AltGlyphElement, AnimateElement, AnimateMotionElement, AnimateTransformElement, AnimatedLength, AnimatedLengthList, AnimatedNumber, AnimatedNumberList, AnimationElement, CircleElement, ClipPathElement, DefsElement, DescElement, DiscardElement, EllipseElement, FEBlendElement, FEColorMatrixElement, FEComponentTransferElement, FECompositeElement, FEConvolveMatrixElement, FEDiffuseLightingElement, FEDisplacementMapElement, FEDistantLightElement, FEFloodElement, FEFuncAElement, FEFuncBElement, FEFuncGElement, FEFuncRElement, FEGaussianBlurElement, FEImageElement, FEMergeElement, FEMergeNodeElement, FEMorphologyElement, FEOffsetElement, FEPointLightElement, FESpecularLightingElement, FESpotLightElement, FETileElement, FETurbulenceElement, FilterElement, ForeignObjectElement, GElement, GeometryElement, GraphicsElement, ImageElement0, LineElement, LinearGradientElement, MarkerElement, MaskElement, MetadataElement, PathElement, PatternElement, PolygonElement, PolylineElement, RadialGradientElement, RectElement, ScriptElement0, SetElement, StopElement, StyleElement0, SvgElement, SvgSvgElement, SwitchElement, SymbolElement, TSpanElement, TextContentElement, TextElement, TextPathElement, TextPositioningElement, TitleElement0, UseElement, ViewElement, ZoomEvent, _GradientElement, _SVGAltGlyphDefElement, _SVGAltGlyphItemElement, _SVGComponentTransferFunctionElement, _SVGCursorElement, _SVGFEDropShadowElement, _SVGFontElement, _SVGFontFaceElement, _SVGFontFaceFormatElement, _SVGFontFaceNameElement, _SVGFontFaceSrcElement, _SVGFontFaceUriElement, _SVGGlyphElement, _SVGGlyphRefElement, _SVGHKernElement, _SVGMPathElement, _SVGMissingGlyphElement, _SVGVKernElement, AudioProcessingEvent, OfflineAudioCompletionEvent, ContextEvent, SqlError, NativeTypedData, NativeUint8List, JS_CONST, Interceptor, JSBool, JSNull, JavaScriptObject, PlainJavaScriptObject, UnknownJavaScriptObject, JSArray, JSNumber, JSInt, JSDouble, JSString, startRootIsolate_closure, startRootIsolate_closure0, _Manager, _IsolateContext, _IsolateContext_handlePing_respond, _EventLoop, _EventLoop__runHelper_next, _IsolateEvent, _MainManagerStub, IsolateNatives__processWorkerMessage_closure, IsolateNatives__startIsolate_runStartFunction, _BaseSendPort, _NativeJsSendPort, _NativeJsSendPort_send_closure, _WorkerSendPort, RawReceivePortImpl, _JsSerializer, _JsCopier, _JsDeserializer, _JsVisitedMap, _MessageTraverserVisitedMap, _MessageTraverser, _Copier, _Copier_visitMap_closure, _Serializer, _Deserializer, TimerImpl, TimerImpl_internalCallback, TimerImpl_internalCallback0, CapabilityImpl, ReflectionInfo, TypeErrorDecoder, NullError, JsNoSuchMethodError, UnknownJsTypeError, unwrapException_saveStackTrace, _StackTrace, invokeClosure_closure, invokeClosure_closure0, invokeClosure_closure1, invokeClosure_closure2, invokeClosure_closure3, Closure, TearOffClosure, BoundClosure, RuntimeError, RuntimeType, RuntimeFunctionType, DynamicRuntimeType, initHooks_closure, initHooks_closure0, initHooks_closure1, Card, Controller, ListIterator, MappedIterable, EfficientLengthMappedIterable, MappedIterator, FixedLengthListMixin, _AsyncRun__scheduleImmediateJsOverride_internalCallback, _AsyncError, _Completer, _AsyncCompleter, _SyncCompleter, _Future, _Future__addListener_closure, _Future__chainForeignFuture_closure, _Future__chainForeignFuture_closure0, _Future__asyncComplete_closure0, _Future__asyncComplete_closure, _Future__asyncCompleteError_closure, _Future__propagateToListeners_handleValueCallback, _Future__propagateToListeners_handleError, _Future__propagateToListeners_handleWhenCompleteCallback, _Future__propagateToListeners_handleWhenCompleteCallback_closure, _Future__propagateToListeners_handleWhenCompleteCallback_closure0, _AsyncCallbackEntry, Stream, Stream_forEach_closure, Stream_forEach__closure, Stream_forEach__closure0, Stream_forEach_closure0, Stream_length_closure, Stream_length_closure0, StreamSubscription, _EventSink, _cancelAndError_closure, _cancelAndErrorClosure_closure, _BaseZone, _BaseZone_bindCallback_closure, _BaseZone_bindCallback_closure0, _BaseZone_bindUnaryCallback_closure, _BaseZone_bindUnaryCallback_closure0, _rootHandleUncaughtError_closure, _rootHandleUncaughtError__closure, _RootZone, _HashMap, _HashMap_values_closure, HashMapKeyIterable, HashMapKeyIterator, _LinkedHashMap, _LinkedHashMap_values_closure, LinkedHashMapCell, LinkedHashMapKeyIterable, LinkedHashMapKeyIterator, _HashSet, _IdentityHashSet, HashSetIterator, _LinkedHashSet, LinkedHashSetCell, LinkedHashSetIterator, _HashSetBase, IterableBase, ListMixin, Maps_mapToString_closure, ListQueue, _ListQueueIterator, _convertJsonToDart_closure, _convertJsonToDart_walk, Codec, Converter, JsonCodec, JsonDecoder, NoSuchMethodError_toString_closure, bool, DateTime, $double, Duration, Duration_toString_sixDigits, Duration_toString_twoDigits, Error, NullThrownError, ArgumentError, RangeError, UnsupportedError, UnimplementedError, StateError, ConcurrentModificationError, OutOfMemoryError, StackOverflowError, CyclicInitializationError, _ExceptionImplementation, FormatException, Expando, Function, $int, Iterator, List, Null, num, Object, StackTrace, String, StringBuffer, Symbol, HttpRequest_getString_closure, HttpRequest_request_closure0, HttpRequest_request_closure, Window_animationFrame_closure, EventStreamProvider, _EventStream, _ElementEventStreamImpl, _EventStreamSubscription, Capability, Point, _RectangleBase, Rectangle, NativeTypedArray, NativeTypedArrayOfInt, NativeTypedArray_ListMixin, NativeTypedArray_ListMixin_FixedLengthListMixin, main_closure, main_closure0, main_closure1, main_draw];
 }

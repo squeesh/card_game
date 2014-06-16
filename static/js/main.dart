@@ -1,5 +1,4 @@
 import 'dart:html';
-import 'dart:async';
 import 'dart:convert';
 
 import 'controller.dart';
@@ -11,12 +10,12 @@ void main() {
   Controller ctrl = Controller.get();
   
   window.onResize.listen((e) {
-    print('resize...');
     ctrl.canvas.width = window.innerWidth - 5;
     ctrl.canvas.height = window.innerHeight - 5;
   });
 
   var display_data = "test";
+  var display_fps = "";
   
   
   ctrl.mouse_x = 0;
@@ -35,6 +34,17 @@ void main() {
     num my = ctrl.mouse_y;
     
     display_data = "$mx | $my";
+    
+    for(Card card in cards) {
+      card.highlight = false;
+    }
+    
+    for(num i=cards.length-1; i >= 0; i--) {
+      if(cards[i].is_over_card(ctrl.mouse_x, ctrl.mouse_y)) {
+        cards[i].highlight = true;
+        break;
+      }
+    }
   });
   
 //  HttpRequest request = new HttpRequest();
@@ -57,7 +67,12 @@ void main() {
       });
 
 
+  DateTime old_now = new DateTime.now();
+  num frames = 0;
+  
   void draw(num) {
+    DateTime now = new DateTime.now();
+    
     ctx.save();
     
     // Use the identity matrix while clearing the canvas
@@ -71,14 +86,21 @@ void main() {
     ctx.font="20px Georgia";
     ctx.textAlign = "left";
     ctx.fillText(display_data, 10, 30);
+    ctx.fillText(display_fps, 10, 50);
 
     for(Card card in cards) {
       card.render(ctx);
     }
 
-    new Future.delayed(const Duration(milliseconds: 50), () {
-      window.animationFrame.then(draw);
-    });
+    if(now.millisecondsSinceEpoch - old_now.millisecondsSinceEpoch > 1000) {
+      display_fps = "$frames fps";
+      frames = 0;
+      old_now = now;
+    }
+    
+    frames += 1;
+    
+    window.animationFrame.then(draw);
   }
   
   window.animationFrame.then(draw);
