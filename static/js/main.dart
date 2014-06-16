@@ -61,7 +61,7 @@ void main() {
   
 //  HttpRequest request = new HttpRequest();
 //  request.timeout = 0;
-  HttpRequest.getString("http://96.228.188.123:8000/hand/")
+  HttpRequest.getString("http://sloosh.no-ip.org:8000/hand/")
       .then((String fileContents) {
         print(fileContents.toString());
         
