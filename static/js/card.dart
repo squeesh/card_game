@@ -23,10 +23,10 @@ class Card {
     num offset = 0;
     
     if(this.highlight) {
-      ctx.fillStyle = '#00ff00';
+      ctx.fillStyle = '#ccccdd';
       offset = 30;
     } else {
-      ctx.fillStyle = '#ff0000';
+      ctx.fillStyle = '#cccccc';
     }
     
     ctx.fillRect(
@@ -40,10 +40,23 @@ class Card {
         this.HALF_WIDTH * 2, this.HALF_HEIGHT * 2
     );
     
-    ctx.fillStyle = '#000000';
+    List<String> red_suits = ['♥', '♦'];
+    
+    if(red_suits.contains(this.suit)) {
+      ctx.fillStyle = '#AA0000';
+    } else {
+      ctx.fillStyle = '#000000';
+    }
+    
+    // Top left of card
     ctx.font="20px Georgia";
-    ctx.textAlign = "center";
-    ctx.fillText(this.value + this.suit, this.x, this.y - (this.HALF_HEIGHT / 2.0) - offset);
+    ctx.textAlign = "left";
+    ctx.fillText(this.value + this.suit, this.x - this.HALF_WIDTH + 5, this.y - this.HALF_HEIGHT + 20 - offset);
+    
+  // Center of card
+   ctx.font="50px Georgia";
+   ctx.textAlign = "center";
+   ctx.fillText(this.suit, this.x, this.y - offset);
 //    ctx.fillText(this.suit,  this.x, this.y - (this.HALF_HEIGHT / 2.0) + 20);
   }
   
