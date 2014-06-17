@@ -5,11 +5,6 @@ import 'controller.dart';
 
 void main() {
   Controller ctrl = Controller.get();
-  
-  window.onResize.listen((e) {
-    ctrl.canvas.width = window.innerWidth - 5;
-    ctrl.canvas.height = window.innerHeight - 5;
-  });
 
   CanvasRenderingContext2D ctx = ctrl.ctx;
   
@@ -18,6 +13,3 @@ void main() {
 
   window.animationFrame.then(ctrl.render);
 }
-
-
-
