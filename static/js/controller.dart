@@ -1,9 +1,9 @@
 library controller;
 
 import 'dart:html';
-import 'dart:convert';
 
 import 'card.dart';
+import 'hand.dart';
 
 
 class Controller {
@@ -16,8 +16,8 @@ class Controller {
   String display_data = "";
   String display_fps = "";
   
-  List<Card> cards = null;
-  
+  Hand player_1_hand;
+
   num frame_count;
   
   DateTime old_now;
@@ -29,15 +29,15 @@ class Controller {
     this.mouse_y = 0;
     
     this.frame_count = 0;
-    
-    this.cards = [];
-    
+
     this.old_now = new DateTime.now();
     
     this.canvas = querySelector('#draw > canvas');
     this.canvas.width = window.innerWidth - 5;
     this.canvas.height = window.innerHeight - 5;
     this.ctx = this.canvas.context2D;
+    
+    this.player_1_hand = new Hand(0, this.canvas.height);
 
   }
   
@@ -51,35 +51,27 @@ class Controller {
       
       this.display_data = "$mx | $my";
       
-      for(Card card in this.cards) {
+      for(Card card in this.player_1_hand.cards) {
         card.highlight = false;
       }
+
+      Card hovered_card = this.player_1_hand.get_hovered_card(this.mouse_x, this.mouse_y);
       
-      for(num i=this.cards.length-1; i >= 0; i--) {
-        if(this.cards[i].is_over_card(this.mouse_x, this.mouse_y)) {
-          this.cards[i].highlight = true;
-          break;
-        }
+      if(hovered_card != null) {
+        hovered_card.highlight = true;
       }
+    });
+    
+    window.onResize.listen((e) {
+      this.canvas.width = window.innerWidth - 5;
+      this.canvas.height = window.innerHeight - 5;
+      
+      this.player_1_hand.y = this.canvas.height;
     });
   }
   
   void populate_hand() {
-    HttpRequest.getString("http://squeesh.net:8000/hand/").then((String fileContents) {
-      Controller ctrl = Controller.get();
-      
-      var json_data = JSON.decode(fileContents.toString());
-      num cards_num = json_data.length;
-
-      num i = 0;
-      for(var data in json_data) {
-        num x = ctrl.canvas.width * (i + 1) / (cards_num + 1.0);
-        num y = ctrl.canvas.height;
-        
-        ctrl.cards.add(new Card(x, y, data['value'], data['suit']));
-        i += 1;
-      }
-    });
+    this.player_1_hand.populate();
   }
   
   static Controller get() {
@@ -108,9 +100,7 @@ class Controller {
     this.ctx.fillText(this.display_data, 10, 30);
     this.ctx.fillText(this.display_fps, 10, 50);
 
-    for(Card card in this.cards) {
-      card.render(this.ctx);
-    }
+    this.player_1_hand.render(this);
 
     if(now.millisecondsSinceEpoch - old_now.millisecondsSinceEpoch > 1000) {
       this.display_fps = "$frame_count fps";

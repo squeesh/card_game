@@ -2813,73 +2813,37 @@ var $$ = {};
 ["card", "card.dart", , G, {
   "^": "",
   Card: {
-    "^": "Object;x>,y>,highlight?,HALF_WIDTH,HALF_HEIGHT,value,suit",
-    render$1: function(ctx) {
-      var offset, t1, t2, t3, t4, t5, t6, t7;
-      F.Controller_get();
-      if (this.highlight) {
-        ctx.fillStyle = "#ccccdd";
-        offset = 30;
-      } else {
-        ctx.fillStyle = "#cccccc";
-        offset = 0;
-      }
-      t1 = this.x;
-      t2 = this.HALF_WIDTH;
-      t3 = t1 - t2;
-      t4 = this.y;
-      t5 = this.HALF_HEIGHT;
-      if (typeof t4 !== "number")
-        return t4.$sub();
-      t6 = t4 - t5;
-      t7 = t6 - offset;
-      t2 *= 2;
-      t5 *= 2;
-      ctx.fillRect(t3, t7, t2, t5);
-      ctx.strokeStyle = "#000000";
-      ctx.strokeRect(t3, t7, t2, t5);
-      t2 = this.suit;
-      if (C.JSArray_methods.contains$1(["\u2665", "\u2666"], t2))
-        ctx.fillStyle = "#AA0000";
-      else
-        ctx.fillStyle = "#000000";
-      ctx.font = "20px Georgia";
-      ctx.textAlign = "left";
-      C.CanvasRenderingContext2D_methods.fillText$3(ctx, J.$add$ns(this.value, t2), t3 + 5, t6 + 20 - offset);
-      ctx.font = "50px Georgia";
-      ctx.textAlign = "center";
-      C.CanvasRenderingContext2D_methods.fillText$3(ctx, t2, t1, t4 - offset);
-    }
+    "^": "Object;highlight?,value,suit",
+    static: {"^": "Card_HALF_WIDTH,Card_HALF_HEIGHT"}
   }
 }],
 ["controller", "controller.dart", , F, {
   "^": "",
   Controller: {
-    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,cards,frame_count,old_now",
+    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,frame_count,old_now",
     add_listeners$0: function() {
       var t1 = J.get$onMouseMove$x(this.canvas);
       H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
-    },
-    populate_hand$0: function() {
-      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new F.Controller_populate_hand_closure());
+      t1 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
+      H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure0(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
     },
     render$1: [function(time) {
-      var now, t1;
-      now = new P.DateTime(Date.now(), false);
+      var t1, now, t2;
+      t1 = Date.now();
+      now = new P.DateTime(t1, false);
       now.DateTime$_now$0();
       this.ctx.save();
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.ctx.clearRect(0, 0, J.get$width$x(this.canvas), J.get$height$x(this.canvas));
       this.ctx.restore();
-      t1 = this.ctx;
-      t1.fillStyle = "#000000";
-      t1.font = "20px Georgia";
-      t1.textAlign = "left";
-      J.fillText$3$x(t1, this.display_data, 10, 30);
+      t2 = this.ctx;
+      t2.fillStyle = "#000000";
+      t2.font = "20px Georgia";
+      t2.textAlign = "left";
+      J.fillText$3$x(t2, this.display_data, 10, 30);
       J.fillText$3$x(this.ctx, this.display_fps, 10, 50);
-      for (t1 = this.cards, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();)
-        t1._current.render$1(this.ctx);
-      if (now.millisecondsSinceEpoch - this.old_now.millisecondsSinceEpoch > 1000) {
+      this.player_1_hand.render$1(this);
+      if (t1 - this.old_now.millisecondsSinceEpoch > 1000) {
         this.display_fps = "" + this.frame_count + " fps";
         this.frame_count = 0;
         this.old_now = now;
@@ -2892,7 +2856,6 @@ var $$ = {};
       this.mouse_x = 0;
       this.mouse_y = 0;
       this.frame_count = 0;
-      this.cards = [];
       t1 = new P.DateTime(Date.now(), false);
       t1.DateTime$_now$0();
       this.old_now = t1;
@@ -2908,6 +2871,9 @@ var $$ = {};
         return t1.$sub();
       J.set$height$x(t2, t1 - 5);
       this.ctx = J.get$context2D$x(this.canvas);
+      t1 = new A.Hand(null, null, null);
+      t1.Hand$2(0, J.get$height$x(this.canvas));
+      this.player_1_hand = t1;
     },
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
@@ -2922,7 +2888,7 @@ var $$ = {};
   Controller_add_listeners_closure: {
     "^": "Closure:12;this_0",
     call$1: function($event) {
-      var t1, t2, t3, i, t4, t5, t6;
+      var t1, t2, t3, hovered_card;
       t1 = this.this_0;
       t2 = J.getInterceptor$x($event);
       t3 = t2.get$client($event);
@@ -2931,62 +2897,29 @@ var $$ = {};
       t2 = t2.get$y(t2);
       t1.mouse_y = t2;
       t1.display_data = H.S(t1.mouse_x) + " | " + H.S(t2);
-      for (t2 = t1.cards, t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
+      for (t2 = t1.player_1_hand.cards, t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
         t2._current.set$highlight(false);
-      for (i = t1.cards.length - 1; i >= 0; --i) {
-        t2 = t1.cards;
-        if (i >= t2.length)
-          return H.ioore(t2, i);
-        t2 = t2[i];
-        t3 = t1.mouse_x;
-        t4 = t1.mouse_y;
-        t5 = t2.x;
-        t6 = t2.HALF_WIDTH;
-        if (typeof t3 !== "number")
-          return t3.$gt();
-        if (t3 > t5 - t6)
-          if (t3 < t5 + t6) {
-            t3 = t2.y;
-            t2 = t2.HALF_HEIGHT;
-            if (typeof t3 !== "number")
-              return t3.$sub();
-            if (typeof t4 !== "number")
-              return t4.$gt();
-            t2 = t4 > t3 - t2 && t4 < t3 + t2;
-          } else
-            t2 = false;
-        else
-          t2 = false;
-        if (t2) {
-          t2 = t1.cards;
-          if (i >= t2.length)
-            return H.ioore(t2, i);
-          t2[i].highlight = true;
-          break;
-        }
-      }
+      hovered_card = t1.player_1_hand.get_hovered_card$2(t1.mouse_x, t1.mouse_y);
+      if (hovered_card != null)
+        hovered_card.highlight = true;
     }
   },
-  Controller_populate_hand_closure: {
-    "^": "Closure:10;",
-    call$1: function(fileContents) {
-      var ctrl, json_data, t1, cards_num, i, data, t2, y, t3;
-      ctrl = F.Controller_get();
-      json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
-      t1 = J.getInterceptor$asx(json_data);
-      cards_num = t1.get$length(json_data);
-      for (t1 = t1.get$iterator(json_data), i = 0; t1.moveNext$0();) {
-        data = t1.get$current();
-        ++i;
-        t2 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
-        if (typeof cards_num !== "number")
-          return cards_num.$add();
-        if (typeof t2 !== "number")
-          return t2.$div();
-        y = J.get$height$x(ctrl.canvas);
-        t3 = J.getInterceptor$asx(data);
-        ctrl.cards.push(new G.Card(t2 / (cards_num + 1), y, false, 100, 150, t3.$index(data, "value"), t3.$index(data, "suit")));
-      }
+  Controller_add_listeners_closure0: {
+    "^": "Closure:8;this_1",
+    call$1: function(e) {
+      var t1, t2, t3;
+      t1 = this.this_1;
+      t2 = t1.canvas;
+      t3 = window.innerWidth;
+      if (typeof t3 !== "number")
+        return t3.$sub();
+      J.set$width$x(t2, t3 - 5);
+      t3 = t1.canvas;
+      t2 = window.innerHeight;
+      if (typeof t2 !== "number")
+        return t2.$sub();
+      J.set$height$x(t3, t2 - 5);
+      t1.player_1_hand.y = J.get$height$x(t1.canvas);
     }
   }
 }],
@@ -6326,34 +6259,139 @@ var $$ = {};
     throw "Unable to print message: " + String(string);
   }
 }],
+["hand", "hand.dart", , A, {
+  "^": "",
+  Hand: {
+    "^": "Object;x>,y>,cards",
+    populate$0: function() {
+      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.Hand_populate_closure(this));
+    },
+    render$1: function(ctrl) {
+      var cards_num, t1, i, t2, curr_card, t3, card_x, ctx, offset, t4, t5, t6;
+      cards_num = this.cards.length;
+      for (t1 = cards_num + 1, i = 0; i < cards_num;) {
+        t2 = this.cards;
+        if (i >= t2.length)
+          return H.ioore(t2, i);
+        curr_card = t2[i];
+        t2 = this.x;
+        ++i;
+        t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
+        if (typeof t3 !== "number")
+          return t3.$div();
+        card_x = t2 + t3 / t1;
+        t3 = this.y;
+        t2 = $.Controller__ctrl;
+        if (t2 == null) {
+          t2 = new F.Controller(null, null, null, null, "", "", null, null, null);
+          t2.Controller$0();
+          $.Controller__ctrl = t2;
+        }
+        ctx = t2.ctx;
+        if (curr_card.highlight) {
+          ctx.fillStyle = "#ccccdd";
+          offset = 30;
+        } else {
+          ctx.fillStyle = "#cccccc";
+          offset = 0;
+        }
+        t2 = $.Card_HALF_WIDTH;
+        t4 = $.Card_HALF_HEIGHT;
+        if (typeof t3 !== "number")
+          return t3.$sub();
+        ctx.fillRect(card_x - t2, t3 - t4 - offset, t2 * 2, t4 * 2);
+        ctx.strokeStyle = "#000000";
+        t4 = $.Card_HALF_WIDTH;
+        t2 = $.Card_HALF_HEIGHT;
+        ctx.strokeRect(card_x - t4, t3 - t2 - offset, t4 * 2, t2 * 2);
+        t2 = curr_card.suit;
+        if (C.JSArray_methods.contains$1(["\u2665", "\u2666"], t2))
+          ctx.fillStyle = "#AA0000";
+        else
+          ctx.fillStyle = "#000000";
+        ctx.font = "20px Georgia";
+        ctx.textAlign = "left";
+        t4 = J.$add$ns(curr_card.value, t2);
+        t5 = $.Card_HALF_WIDTH;
+        t6 = $.Card_HALF_HEIGHT;
+        ctx.fillText(t4, card_x - t5 + 5, t3 - t6 + 20 - offset);
+        ctx.font = "50px Georgia";
+        ctx.textAlign = "center";
+        ctx.fillText(t2, card_x, t3 - offset);
+      }
+    },
+    get_hovered_card$2: function(mouse_x, mouse_y) {
+      var ctrl, card_y, cards_num, i, t1, t2, curr_card, t3, card_x;
+      ctrl = F.Controller_get();
+      card_y = this.y;
+      cards_num = this.cards.length;
+      for (i = cards_num - 1, t1 = cards_num + 1; i >= 0; --i) {
+        t2 = this.cards;
+        if (i >= t2.length)
+          return H.ioore(t2, i);
+        curr_card = t2[i];
+        t2 = this.x;
+        t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i + 1);
+        if (typeof t3 !== "number")
+          return t3.$div();
+        card_x = t2 + t3 / t1;
+        t2 = $.Card_HALF_WIDTH;
+        if (typeof mouse_x !== "number")
+          return mouse_x.$gt();
+        if (mouse_x > card_x - t2)
+          if (mouse_x < card_x + t2) {
+            t2 = $.Card_HALF_HEIGHT;
+            if (typeof card_y !== "number")
+              return card_y.$sub();
+            if (typeof mouse_y !== "number")
+              return mouse_y.$gt();
+            t2 = mouse_y > card_y - t2 && mouse_y < card_y + t2;
+          } else
+            t2 = false;
+        else
+          t2 = false;
+        if (t2)
+          return curr_card;
+      }
+      return;
+    },
+    Hand$2: function(x, y) {
+      this.x = x;
+      this.y = y;
+      this.cards = [];
+    }
+  },
+  Hand_populate_closure: {
+    "^": "Closure:10;this_0",
+    call$1: function(fileContents) {
+      var ctrl, json_data, t1, cards_num, t2, i, data, t3;
+      ctrl = F.Controller_get();
+      json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
+      t1 = J.getInterceptor$asx(json_data);
+      cards_num = t1.get$length(json_data);
+      for (t1 = t1.get$iterator(json_data), t2 = this.this_0, i = 0; t1.moveNext$0();) {
+        data = t1.get$current();
+        ++i;
+        t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
+        if (typeof cards_num !== "number")
+          return cards_num.$add();
+        if (typeof t3 !== "number")
+          return t3.$div();
+        J.get$height$x(ctrl.canvas);
+        t3 = J.getInterceptor$asx(data);
+        t2.cards.push(new G.Card(false, t3.$index(data, "value"), t3.$index(data, "suit")));
+      }
+    }
+  }
+}],
 ["", "main.dart", , F, {
   "^": "",
   main: [function() {
-    var ctrl, t1;
-    ctrl = F.Controller_get();
-    t1 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.main_closure(ctrl)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+    var ctrl = F.Controller_get();
     ctrl.add_listeners$0();
-    ctrl.populate_hand$0();
+    ctrl.player_1_hand.populate$0();
     C.Window_methods.get$animationFrame(window).then$1(ctrl.get$render());
-  }, "call$0", "main$closure", 0, 0, 1],
-  main_closure: {
-    "^": "Closure:8;ctrl_0",
-    call$1: function(e) {
-      var t1, t2, t3;
-      t1 = this.ctrl_0;
-      t2 = t1.canvas;
-      t3 = window.innerWidth;
-      if (typeof t3 !== "number")
-        return t3.$sub();
-      J.set$width$x(t2, t3 - 5);
-      t1 = t1.canvas;
-      t3 = window.innerHeight;
-      if (typeof t3 !== "number")
-        return t3.$sub();
-      J.set$height$x(t1, t3 - 5);
-    }
-  }
+  }, "call$0", "main$closure", 0, 0, 1]
 },
 1],
 ]);
@@ -6364,15 +6402,15 @@ $$ = null;
 P.$int.$is$int = true;
 P.$int.$isnum = true;
 P.$int.$isObject = true;
-P.String.$isString = true;
-P.String.$isObject = true;
 P.num.$isnum = true;
 P.num.$isObject = true;
+P.String.$isString = true;
+P.String.$isObject = true;
 P.Duration.$isObject = true;
 P.Object.$isObject = true;
-W.Event.$isObject = true;
 W.HttpRequest.$isObject = true;
 W.ProgressEvent.$isObject = true;
+W.Event.$isObject = true;
 W.MouseEvent.$isMouseEvent = true;
 W.MouseEvent.$isObject = true;
 H.RawReceivePortImpl.$isObject = true;
@@ -6386,8 +6424,8 @@ P.StackTrace.$isStackTrace = true;
 P.StackTrace.$isObject = true;
 P._EventSink.$is_EventSink = true;
 P._EventSink.$isObject = true;
-W.CanvasRenderingContext2D.$isCanvasRenderingContext2D = true;
-W.CanvasRenderingContext2D.$isObject = true;
+F.Controller.$isController = true;
+F.Controller.$isObject = true;
 P.Function.$isFunction = true;
 P.Function.$isObject = true;
 // getInterceptor methods
@@ -6549,7 +6587,6 @@ J.set$width$x = function(receiver, value) {
 J.toString$0 = function(receiver) {
   return J.getInterceptor(receiver).toString$0(receiver);
 };
-C.CanvasRenderingContext2D_methods = W.CanvasRenderingContext2D.prototype;
 C.HttpRequest_methods = W.HttpRequest.prototype;
 C.JSArray_methods = J.JSArray.prototype;
 C.JSInt_methods = J.JSInt.prototype;
@@ -6712,6 +6749,8 @@ $.prototypeForTagFunction = null;
 $.dispatchRecordsForInstanceTags = null;
 $.interceptorsForUncacheableTags = null;
 $.initNativeDispatchFlag = null;
+$.Card_HALF_WIDTH = 100;
+$.Card_HALF_HEIGHT = 150;
 $.Controller__ctrl = null;
 $.printToZone = null;
 $._nextCallback = null;
@@ -10470,12 +10509,8 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   initHooks_closure1.prototype = $desc;
-  function Card(x, y, highlight, HALF_WIDTH, HALF_HEIGHT, value, suit) {
-    this.x = x;
-    this.y = y;
+  function Card(highlight, value, suit) {
     this.highlight = highlight;
-    this.HALF_WIDTH = HALF_WIDTH;
-    this.HALF_HEIGHT = HALF_HEIGHT;
     this.value = value;
     this.suit = suit;
   }
@@ -10486,23 +10521,17 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   Card.prototype = $desc;
-  Card.prototype.get$x = function(receiver) {
-    return this.x;
-  };
-  Card.prototype.get$y = function(receiver) {
-    return this.y;
-  };
   Card.prototype.set$highlight = function(v) {
     return this.highlight = v;
   };
-  function Controller(mouse_x, mouse_y, canvas, ctx, display_data, display_fps, cards, frame_count, old_now) {
+  function Controller(mouse_x, mouse_y, canvas, ctx, display_data, display_fps, player_1_hand, frame_count, old_now) {
     this.mouse_x = mouse_x;
     this.mouse_y = mouse_y;
     this.canvas = canvas;
     this.ctx = ctx;
     this.display_data = display_data;
     this.display_fps = display_fps;
-    this.cards = cards;
+    this.player_1_hand = player_1_hand;
     this.frame_count = frame_count;
     this.old_now = old_now;
   }
@@ -10523,15 +10552,16 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   Controller_add_listeners_closure.prototype = $desc;
-  function Controller_populate_hand_closure() {
+  function Controller_add_listeners_closure0(this_1) {
+    this.this_1 = this_1;
   }
-  Controller_populate_hand_closure.builtin$cls = "Controller_populate_hand_closure";
-  if (!"name" in Controller_populate_hand_closure)
-    Controller_populate_hand_closure.name = "Controller_populate_hand_closure";
-  $desc = $collectedClasses.Controller_populate_hand_closure;
+  Controller_add_listeners_closure0.builtin$cls = "Controller_add_listeners_closure0";
+  if (!"name" in Controller_add_listeners_closure0)
+    Controller_add_listeners_closure0.name = "Controller_add_listeners_closure0";
+  $desc = $collectedClasses.Controller_add_listeners_closure0;
   if ($desc instanceof Array)
     $desc = $desc[1];
-  Controller_populate_hand_closure.prototype = $desc;
+  Controller_add_listeners_closure0.prototype = $desc;
   function ListIterator(_iterable, _length, _index, _current) {
     this._iterable = _iterable;
     this._length = _length;
@@ -11832,15 +11862,33 @@ function dart_precompiled($collectedClasses) {
   if ($desc instanceof Array)
     $desc = $desc[1];
   NativeTypedArray_ListMixin_FixedLengthListMixin.prototype = $desc;
-  function main_closure(ctrl_0) {
-    this.ctrl_0 = ctrl_0;
+  function Hand(x, y, cards) {
+    this.x = x;
+    this.y = y;
+    this.cards = cards;
   }
-  main_closure.builtin$cls = "main_closure";
-  if (!"name" in main_closure)
-    main_closure.name = "main_closure";
-  $desc = $collectedClasses.main_closure;
+  Hand.builtin$cls = "Hand";
+  if (!"name" in Hand)
+    Hand.name = "Hand";
+  $desc = $collectedClasses.Hand;
   if ($desc instanceof Array)
     $desc = $desc[1];
-  main_closure.prototype = $desc;
-  return [HtmlElement, AnchorElement, AnimationEvent, AreaElement, AudioElement, AutocompleteErrorEvent, BRElement, BaseElement, BeforeLoadEvent, BeforeUnloadEvent, BodyElement, ButtonElement, CanvasElement, CanvasGradient, CanvasPattern, CanvasRenderingContext, CanvasRenderingContext2D, CloseEvent, CompositionEvent, ContentElement, CssFontFaceLoadEvent, CustomEvent, DListElement, DataListElement, DetailsElement, DeviceMotionEvent, DeviceOrientationEvent, DialogElement, DivElement, Document, DomError, DomException, Element, EmbedElement, ErrorEvent, Event, EventTarget, FieldSetElement, FileError, FocusEvent, FormElement, HRElement, HashChangeEvent, HeadElement, HeadingElement, HtmlDocument, HtmlHtmlElement, HttpRequest, HttpRequestEventTarget, IFrameElement, ImageElement, InputElement, InstallEvent, InstallPhaseEvent, KeyboardEvent, KeygenElement, LIElement, LabelElement, LegendElement, LinkElement, MapElement, MediaElement, MediaError, MediaKeyError, MediaKeyEvent, MediaKeyMessageEvent, MediaKeyNeededEvent, MediaStreamEvent, MediaStreamTrackEvent, MenuElement, MessageEvent, MetaElement, MeterElement, MidiConnectionEvent, MidiMessageEvent, ModElement, MouseEvent, Navigator, NavigatorUserMediaError, Node, OListElement, ObjectElement, OptGroupElement, OptionElement, OutputElement, OverflowEvent, PageTransitionEvent, ParagraphElement, ParamElement, PopStateEvent, PositionError, PreElement, ProgressElement, ProgressEvent, QuoteElement, ResourceProgressEvent, RtcDataChannelEvent, RtcDtmfToneChangeEvent, RtcIceCandidateEvent, ScriptElement, SecurityPolicyViolationEvent, SelectElement, ShadowElement, SourceElement, SpanElement, SpeechInputEvent, SpeechRecognitionError, SpeechRecognitionEvent, SpeechSynthesisEvent, StorageEvent, StyleElement, TableCaptionElement, TableCellElement, TableColElement, TableElement, TableRowElement, TableSectionElement, TemplateElement, TextAreaElement, TextEvent, TitleElement, TouchEvent, TrackElement, TrackEvent, TransitionEvent, UIEvent, UListElement, UnknownElement, VideoElement, WheelEvent, Window, _HTMLAppletElement, _HTMLDirectoryElement, _HTMLFontElement, _HTMLFrameElement, _HTMLFrameSetElement, _HTMLMarqueeElement, _MutationEvent, _XMLHttpRequestProgressEvent, VersionChangeEvent, AElement, AltGlyphElement, AnimateElement, AnimateMotionElement, AnimateTransformElement, AnimatedLength, AnimatedLengthList, AnimatedNumber, AnimatedNumberList, AnimationElement, CircleElement, ClipPathElement, DefsElement, DescElement, DiscardElement, EllipseElement, FEBlendElement, FEColorMatrixElement, FEComponentTransferElement, FECompositeElement, FEConvolveMatrixElement, FEDiffuseLightingElement, FEDisplacementMapElement, FEDistantLightElement, FEFloodElement, FEFuncAElement, FEFuncBElement, FEFuncGElement, FEFuncRElement, FEGaussianBlurElement, FEImageElement, FEMergeElement, FEMergeNodeElement, FEMorphologyElement, FEOffsetElement, FEPointLightElement, FESpecularLightingElement, FESpotLightElement, FETileElement, FETurbulenceElement, FilterElement, ForeignObjectElement, GElement, GeometryElement, GraphicsElement, ImageElement0, LineElement, LinearGradientElement, MarkerElement, MaskElement, MetadataElement, PathElement, PatternElement, PolygonElement, PolylineElement, RadialGradientElement, RectElement, ScriptElement0, SetElement, StopElement, StyleElement0, SvgElement, SvgSvgElement, SwitchElement, SymbolElement, TSpanElement, TextContentElement, TextElement, TextPathElement, TextPositioningElement, TitleElement0, UseElement, ViewElement, ZoomEvent, _GradientElement, _SVGAltGlyphDefElement, _SVGAltGlyphItemElement, _SVGComponentTransferFunctionElement, _SVGCursorElement, _SVGFEDropShadowElement, _SVGFontElement, _SVGFontFaceElement, _SVGFontFaceFormatElement, _SVGFontFaceNameElement, _SVGFontFaceSrcElement, _SVGFontFaceUriElement, _SVGGlyphElement, _SVGGlyphRefElement, _SVGHKernElement, _SVGMPathElement, _SVGMissingGlyphElement, _SVGVKernElement, AudioProcessingEvent, OfflineAudioCompletionEvent, ContextEvent, SqlError, NativeTypedData, NativeUint8List, JS_CONST, Interceptor, JSBool, JSNull, JavaScriptObject, PlainJavaScriptObject, UnknownJavaScriptObject, JSArray, JSNumber, JSInt, JSDouble, JSString, startRootIsolate_closure, startRootIsolate_closure0, _Manager, _IsolateContext, _IsolateContext_handlePing_respond, _EventLoop, _EventLoop__runHelper_next, _IsolateEvent, _MainManagerStub, IsolateNatives__processWorkerMessage_closure, IsolateNatives__startIsolate_runStartFunction, _BaseSendPort, _NativeJsSendPort, _NativeJsSendPort_send_closure, _WorkerSendPort, RawReceivePortImpl, _JsSerializer, _JsCopier, _JsDeserializer, _JsVisitedMap, _MessageTraverserVisitedMap, _MessageTraverser, _Copier, _Copier_visitMap_closure, _Serializer, _Deserializer, TimerImpl, TimerImpl_internalCallback, TimerImpl_internalCallback0, CapabilityImpl, ReflectionInfo, TypeErrorDecoder, NullError, JsNoSuchMethodError, UnknownJsTypeError, unwrapException_saveStackTrace, _StackTrace, invokeClosure_closure, invokeClosure_closure0, invokeClosure_closure1, invokeClosure_closure2, invokeClosure_closure3, Closure, TearOffClosure, BoundClosure, RuntimeError, RuntimeType, RuntimeFunctionType, DynamicRuntimeType, initHooks_closure, initHooks_closure0, initHooks_closure1, Card, Controller, Controller_add_listeners_closure, Controller_populate_hand_closure, ListIterator, MappedIterable, EfficientLengthMappedIterable, MappedIterator, FixedLengthListMixin, _AsyncRun__scheduleImmediateJsOverride_internalCallback, _AsyncError, _Completer, _AsyncCompleter, _SyncCompleter, _Future, _Future__addListener_closure, _Future__chainForeignFuture_closure, _Future__chainForeignFuture_closure0, _Future__asyncComplete_closure0, _Future__asyncComplete_closure, _Future__asyncCompleteError_closure, _Future__propagateToListeners_handleValueCallback, _Future__propagateToListeners_handleError, _Future__propagateToListeners_handleWhenCompleteCallback, _Future__propagateToListeners_handleWhenCompleteCallback_closure, _Future__propagateToListeners_handleWhenCompleteCallback_closure0, _AsyncCallbackEntry, Stream, Stream_forEach_closure, Stream_forEach__closure, Stream_forEach__closure0, Stream_forEach_closure0, Stream_length_closure, Stream_length_closure0, StreamSubscription, _EventSink, _cancelAndError_closure, _cancelAndErrorClosure_closure, _BaseZone, _BaseZone_bindCallback_closure, _BaseZone_bindCallback_closure0, _BaseZone_bindUnaryCallback_closure, _BaseZone_bindUnaryCallback_closure0, _rootHandleUncaughtError_closure, _rootHandleUncaughtError__closure, _RootZone, _HashMap, _HashMap_values_closure, HashMapKeyIterable, HashMapKeyIterator, _LinkedHashMap, _LinkedHashMap_values_closure, LinkedHashMapCell, LinkedHashMapKeyIterable, LinkedHashMapKeyIterator, _HashSet, _IdentityHashSet, HashSetIterator, _LinkedHashSet, LinkedHashSetCell, LinkedHashSetIterator, _HashSetBase, IterableBase, ListMixin, Maps_mapToString_closure, ListQueue, _ListQueueIterator, _convertJsonToDart_closure, _convertJsonToDart_walk, Codec, Converter, JsonCodec, JsonDecoder, NoSuchMethodError_toString_closure, bool, DateTime, $double, Duration, Duration_toString_sixDigits, Duration_toString_twoDigits, Error, NullThrownError, ArgumentError, RangeError, UnsupportedError, UnimplementedError, StateError, ConcurrentModificationError, OutOfMemoryError, StackOverflowError, CyclicInitializationError, _ExceptionImplementation, FormatException, Expando, Function, $int, Iterator, List, Null, num, Object, StackTrace, String, StringBuffer, Symbol, HttpRequest_getString_closure, HttpRequest_request_closure0, HttpRequest_request_closure, Window_animationFrame_closure, EventStreamProvider, _EventStream, _ElementEventStreamImpl, _EventStreamSubscription, Capability, Point, _RectangleBase, Rectangle, NativeTypedArray, NativeTypedArrayOfInt, NativeTypedArray_ListMixin, NativeTypedArray_ListMixin_FixedLengthListMixin, main_closure];
+  Hand.prototype = $desc;
+  Hand.prototype.get$x = function(receiver) {
+    return this.x;
+  };
+  Hand.prototype.get$y = function(receiver) {
+    return this.y;
+  };
+  function Hand_populate_closure(this_0) {
+    this.this_0 = this_0;
+  }
+  Hand_populate_closure.builtin$cls = "Hand_populate_closure";
+  if (!"name" in Hand_populate_closure)
+    Hand_populate_closure.name = "Hand_populate_closure";
+  $desc = $collectedClasses.Hand_populate_closure;
+  if ($desc instanceof Array)
+    $desc = $desc[1];
+  Hand_populate_closure.prototype = $desc;
+  return [HtmlElement, AnchorElement, AnimationEvent, AreaElement, AudioElement, AutocompleteErrorEvent, BRElement, BaseElement, BeforeLoadEvent, BeforeUnloadEvent, BodyElement, ButtonElement, CanvasElement, CanvasGradient, CanvasPattern, CanvasRenderingContext, CanvasRenderingContext2D, CloseEvent, CompositionEvent, ContentElement, CssFontFaceLoadEvent, CustomEvent, DListElement, DataListElement, DetailsElement, DeviceMotionEvent, DeviceOrientationEvent, DialogElement, DivElement, Document, DomError, DomException, Element, EmbedElement, ErrorEvent, Event, EventTarget, FieldSetElement, FileError, FocusEvent, FormElement, HRElement, HashChangeEvent, HeadElement, HeadingElement, HtmlDocument, HtmlHtmlElement, HttpRequest, HttpRequestEventTarget, IFrameElement, ImageElement, InputElement, InstallEvent, InstallPhaseEvent, KeyboardEvent, KeygenElement, LIElement, LabelElement, LegendElement, LinkElement, MapElement, MediaElement, MediaError, MediaKeyError, MediaKeyEvent, MediaKeyMessageEvent, MediaKeyNeededEvent, MediaStreamEvent, MediaStreamTrackEvent, MenuElement, MessageEvent, MetaElement, MeterElement, MidiConnectionEvent, MidiMessageEvent, ModElement, MouseEvent, Navigator, NavigatorUserMediaError, Node, OListElement, ObjectElement, OptGroupElement, OptionElement, OutputElement, OverflowEvent, PageTransitionEvent, ParagraphElement, ParamElement, PopStateEvent, PositionError, PreElement, ProgressElement, ProgressEvent, QuoteElement, ResourceProgressEvent, RtcDataChannelEvent, RtcDtmfToneChangeEvent, RtcIceCandidateEvent, ScriptElement, SecurityPolicyViolationEvent, SelectElement, ShadowElement, SourceElement, SpanElement, SpeechInputEvent, SpeechRecognitionError, SpeechRecognitionEvent, SpeechSynthesisEvent, StorageEvent, StyleElement, TableCaptionElement, TableCellElement, TableColElement, TableElement, TableRowElement, TableSectionElement, TemplateElement, TextAreaElement, TextEvent, TitleElement, TouchEvent, TrackElement, TrackEvent, TransitionEvent, UIEvent, UListElement, UnknownElement, VideoElement, WheelEvent, Window, _HTMLAppletElement, _HTMLDirectoryElement, _HTMLFontElement, _HTMLFrameElement, _HTMLFrameSetElement, _HTMLMarqueeElement, _MutationEvent, _XMLHttpRequestProgressEvent, VersionChangeEvent, AElement, AltGlyphElement, AnimateElement, AnimateMotionElement, AnimateTransformElement, AnimatedLength, AnimatedLengthList, AnimatedNumber, AnimatedNumberList, AnimationElement, CircleElement, ClipPathElement, DefsElement, DescElement, DiscardElement, EllipseElement, FEBlendElement, FEColorMatrixElement, FEComponentTransferElement, FECompositeElement, FEConvolveMatrixElement, FEDiffuseLightingElement, FEDisplacementMapElement, FEDistantLightElement, FEFloodElement, FEFuncAElement, FEFuncBElement, FEFuncGElement, FEFuncRElement, FEGaussianBlurElement, FEImageElement, FEMergeElement, FEMergeNodeElement, FEMorphologyElement, FEOffsetElement, FEPointLightElement, FESpecularLightingElement, FESpotLightElement, FETileElement, FETurbulenceElement, FilterElement, ForeignObjectElement, GElement, GeometryElement, GraphicsElement, ImageElement0, LineElement, LinearGradientElement, MarkerElement, MaskElement, MetadataElement, PathElement, PatternElement, PolygonElement, PolylineElement, RadialGradientElement, RectElement, ScriptElement0, SetElement, StopElement, StyleElement0, SvgElement, SvgSvgElement, SwitchElement, SymbolElement, TSpanElement, TextContentElement, TextElement, TextPathElement, TextPositioningElement, TitleElement0, UseElement, ViewElement, ZoomEvent, _GradientElement, _SVGAltGlyphDefElement, _SVGAltGlyphItemElement, _SVGComponentTransferFunctionElement, _SVGCursorElement, _SVGFEDropShadowElement, _SVGFontElement, _SVGFontFaceElement, _SVGFontFaceFormatElement, _SVGFontFaceNameElement, _SVGFontFaceSrcElement, _SVGFontFaceUriElement, _SVGGlyphElement, _SVGGlyphRefElement, _SVGHKernElement, _SVGMPathElement, _SVGMissingGlyphElement, _SVGVKernElement, AudioProcessingEvent, OfflineAudioCompletionEvent, ContextEvent, SqlError, NativeTypedData, NativeUint8List, JS_CONST, Interceptor, JSBool, JSNull, JavaScriptObject, PlainJavaScriptObject, UnknownJavaScriptObject, JSArray, JSNumber, JSInt, JSDouble, JSString, startRootIsolate_closure, startRootIsolate_closure0, _Manager, _IsolateContext, _IsolateContext_handlePing_respond, _EventLoop, _EventLoop__runHelper_next, _IsolateEvent, _MainManagerStub, IsolateNatives__processWorkerMessage_closure, IsolateNatives__startIsolate_runStartFunction, _BaseSendPort, _NativeJsSendPort, _NativeJsSendPort_send_closure, _WorkerSendPort, RawReceivePortImpl, _JsSerializer, _JsCopier, _JsDeserializer, _JsVisitedMap, _MessageTraverserVisitedMap, _MessageTraverser, _Copier, _Copier_visitMap_closure, _Serializer, _Deserializer, TimerImpl, TimerImpl_internalCallback, TimerImpl_internalCallback0, CapabilityImpl, ReflectionInfo, TypeErrorDecoder, NullError, JsNoSuchMethodError, UnknownJsTypeError, unwrapException_saveStackTrace, _StackTrace, invokeClosure_closure, invokeClosure_closure0, invokeClosure_closure1, invokeClosure_closure2, invokeClosure_closure3, Closure, TearOffClosure, BoundClosure, RuntimeError, RuntimeType, RuntimeFunctionType, DynamicRuntimeType, initHooks_closure, initHooks_closure0, initHooks_closure1, Card, Controller, Controller_add_listeners_closure, Controller_add_listeners_closure0, ListIterator, MappedIterable, EfficientLengthMappedIterable, MappedIterator, FixedLengthListMixin, _AsyncRun__scheduleImmediateJsOverride_internalCallback, _AsyncError, _Completer, _AsyncCompleter, _SyncCompleter, _Future, _Future__addListener_closure, _Future__chainForeignFuture_closure, _Future__chainForeignFuture_closure0, _Future__asyncComplete_closure0, _Future__asyncComplete_closure, _Future__asyncCompleteError_closure, _Future__propagateToListeners_handleValueCallback, _Future__propagateToListeners_handleError, _Future__propagateToListeners_handleWhenCompleteCallback, _Future__propagateToListeners_handleWhenCompleteCallback_closure, _Future__propagateToListeners_handleWhenCompleteCallback_closure0, _AsyncCallbackEntry, Stream, Stream_forEach_closure, Stream_forEach__closure, Stream_forEach__closure0, Stream_forEach_closure0, Stream_length_closure, Stream_length_closure0, StreamSubscription, _EventSink, _cancelAndError_closure, _cancelAndErrorClosure_closure, _BaseZone, _BaseZone_bindCallback_closure, _BaseZone_bindCallback_closure0, _BaseZone_bindUnaryCallback_closure, _BaseZone_bindUnaryCallback_closure0, _rootHandleUncaughtError_closure, _rootHandleUncaughtError__closure, _RootZone, _HashMap, _HashMap_values_closure, HashMapKeyIterable, HashMapKeyIterator, _LinkedHashMap, _LinkedHashMap_values_closure, LinkedHashMapCell, LinkedHashMapKeyIterable, LinkedHashMapKeyIterator, _HashSet, _IdentityHashSet, HashSetIterator, _LinkedHashSet, LinkedHashSetCell, LinkedHashSetIterator, _HashSetBase, IterableBase, ListMixin, Maps_mapToString_closure, ListQueue, _ListQueueIterator, _convertJsonToDart_closure, _convertJsonToDart_walk, Codec, Converter, JsonCodec, JsonDecoder, NoSuchMethodError_toString_closure, bool, DateTime, $double, Duration, Duration_toString_sixDigits, Duration_toString_twoDigits, Error, NullThrownError, ArgumentError, RangeError, UnsupportedError, UnimplementedError, StateError, ConcurrentModificationError, OutOfMemoryError, StackOverflowError, CyclicInitializationError, _ExceptionImplementation, FormatException, Expando, Function, $int, Iterator, List, Null, num, Object, StackTrace, String, StringBuffer, Symbol, HttpRequest_getString_closure, HttpRequest_request_closure0, HttpRequest_request_closure, Window_animationFrame_closure, EventStreamProvider, _EventStream, _ElementEventStreamImpl, _EventStreamSubscription, Capability, Point, _RectangleBase, Rectangle, NativeTypedArray, NativeTypedArrayOfInt, NativeTypedArray_ListMixin, NativeTypedArray_ListMixin_FixedLengthListMixin, Hand, Hand_populate_closure];
 }

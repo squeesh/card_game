@@ -5,20 +5,19 @@ import 'dart:html';
 import 'controller.dart';
 
 class Card {
-  num x;
-  num y;
   bool highlight = false;
   
-  num HALF_WIDTH = 100;
-  num HALF_HEIGHT = 150;
+  static num HALF_WIDTH = 100;
+  static num HALF_HEIGHT = 150;
   
   String value = "5";
   String suit = "Hearts";
   
-  Card(this.x, this.y, this.value, this.suit);
+  Card(this.value, this.suit);
   
-  void render(CanvasRenderingContext2D ctx) {
+  void render(Controller ctrl, num x, num y) {
     Controller ctrl = Controller.get();
+    CanvasRenderingContext2D ctx = ctrl.ctx;
     
     num offset = 0;
     
@@ -30,14 +29,14 @@ class Card {
     }
     
     ctx.fillRect(
-        this.x - this.HALF_WIDTH, this.y - this.HALF_HEIGHT - offset,
-        this.HALF_WIDTH * 2, this.HALF_HEIGHT * 2
+        x - Card.HALF_WIDTH, y - Card.HALF_HEIGHT - offset,
+        Card.HALF_WIDTH * 2, Card.HALF_HEIGHT * 2
     );
     
     ctx.strokeStyle = '#000000';
     ctx.strokeRect(
-        this.x - this.HALF_WIDTH, this.y - this.HALF_HEIGHT - offset,
-        this.HALF_WIDTH * 2, this.HALF_HEIGHT * 2
+        x - Card.HALF_WIDTH, y - Card.HALF_HEIGHT - offset,
+        Card.HALF_WIDTH * 2, Card.HALF_HEIGHT * 2
     );
     
     List<String> red_suits = ['♥', '♦'];
@@ -51,21 +50,12 @@ class Card {
     // Top left of card
     ctx.font="20px Georgia";
     ctx.textAlign = "left";
-    ctx.fillText(this.value + this.suit, this.x - this.HALF_WIDTH + 5, this.y - this.HALF_HEIGHT + 20 - offset);
+    ctx.fillText(this.value + this.suit, x - Card.HALF_WIDTH + 5, y - Card.HALF_HEIGHT + 20 - offset);
     
   // Center of card
    ctx.font="50px Georgia";
    ctx.textAlign = "center";
-   ctx.fillText(this.suit, this.x, this.y - offset);
-//    ctx.fillText(this.suit,  this.x, this.y - (this.HALF_HEIGHT / 2.0) + 20);
+   ctx.fillText(this.suit, x, y - offset);
   }
   
-  bool is_over_card(num mouse_x, num mouse_y) {
-    return (
-        mouse_x > (this.x - this.HALF_WIDTH) && 
-        mouse_x < (this.x + this.HALF_WIDTH) &&
-        mouse_y > (this.y - this.HALF_HEIGHT) && 
-        mouse_y < (this.y + this.HALF_HEIGHT)
-    );
-  }
 }
