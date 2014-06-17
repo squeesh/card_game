@@ -2818,10 +2818,10 @@ var $$ = {};
       var offset, t1, t2, t3, t4, t5, t6, t7;
       F.Controller_get();
       if (this.highlight) {
-        ctx.fillStyle = "#00ff00";
+        ctx.fillStyle = "#ccccdd";
         offset = 30;
       } else {
-        ctx.fillStyle = "#ff0000";
+        ctx.fillStyle = "#cccccc";
         offset = 0;
       }
       t1 = this.x;
@@ -2831,31 +2831,163 @@ var $$ = {};
       t5 = this.HALF_HEIGHT;
       if (typeof t4 !== "number")
         return t4.$sub();
-      t6 = t4 - t5 - offset;
+      t6 = t4 - t5;
+      t7 = t6 - offset;
       t2 *= 2;
-      t7 = t5 * 2;
-      ctx.fillRect(t3, t6, t2, t7);
+      t5 *= 2;
+      ctx.fillRect(t3, t7, t2, t5);
       ctx.strokeStyle = "#000000";
-      ctx.strokeRect(t3, t6, t2, t7);
-      ctx.fillStyle = "#000000";
+      ctx.strokeRect(t3, t7, t2, t5);
+      t2 = this.suit;
+      if (C.JSArray_methods.contains$1(["\u2665", "\u2666"], t2))
+        ctx.fillStyle = "#AA0000";
+      else
+        ctx.fillStyle = "#000000";
       ctx.font = "20px Georgia";
+      ctx.textAlign = "left";
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, J.$add$ns(this.value, t2), t3 + 5, t6 + 20 - offset);
+      ctx.font = "50px Georgia";
       ctx.textAlign = "center";
-      C.CanvasRenderingContext2D_methods.fillText$3(ctx, J.$add$ns(this.value, this.suit), t1, t4 - t5 / 2 - offset);
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, t2, t1, t4 - offset);
     }
   }
 }],
 ["controller", "controller.dart", , F, {
   "^": "",
   Controller: {
-    "^": "Object;mouse_x,mouse_y,canvas",
+    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,cards,frame_count,old_now",
+    add_listeners$0: function() {
+      var t1 = J.get$onMouseMove$x(this.canvas);
+      H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+    },
+    populate_hand$0: function() {
+      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new F.Controller_populate_hand_closure());
+    },
+    render$1: [function(time) {
+      var now, t1;
+      now = new P.DateTime(Date.now(), false);
+      now.DateTime$_now$0();
+      this.ctx.save();
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.clearRect(0, 0, J.get$width$x(this.canvas), J.get$height$x(this.canvas));
+      this.ctx.restore();
+      t1 = this.ctx;
+      t1.fillStyle = "#000000";
+      t1.font = "20px Georgia";
+      t1.textAlign = "left";
+      J.fillText$3$x(t1, this.display_data, 10, 30);
+      J.fillText$3$x(this.ctx, this.display_fps, 10, 50);
+      for (t1 = this.cards, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();)
+        t1._current.render$1(this.ctx);
+      if (now.millisecondsSinceEpoch - this.old_now.millisecondsSinceEpoch > 1000) {
+        this.display_fps = "" + this.frame_count + " fps";
+        this.frame_count = 0;
+        this.old_now = now;
+      }
+      ++this.frame_count;
+      C.Window_methods.get$animationFrame(window).then$1(this.get$render());
+    }, "call$1", "get$render", 2, 0, 11],
+    Controller$0: function() {
+      var t1, t2;
+      this.mouse_x = 0;
+      this.mouse_y = 0;
+      this.frame_count = 0;
+      this.cards = [];
+      t1 = new P.DateTime(Date.now(), false);
+      t1.DateTime$_now$0();
+      this.old_now = t1;
+      t1 = document.querySelector("#draw > canvas");
+      this.canvas = t1;
+      t2 = window.innerWidth;
+      if (typeof t2 !== "number")
+        return t2.$sub();
+      J.set$width$x(t1, t2 - 5);
+      t2 = this.canvas;
+      t1 = window.innerHeight;
+      if (typeof t1 !== "number")
+        return t1.$sub();
+      J.set$height$x(t2, t1 - 5);
+      this.ctx = J.get$context2D$x(this.canvas);
+    },
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
         if (t1 == null) {
-          t1 = new F.Controller(null, null, null);
+          t1 = new F.Controller(null, null, null, null, "", "", null, null, null);
+          t1.Controller$0();
           $.Controller__ctrl = t1;
         }
         return t1;
       }}
+  },
+  Controller_add_listeners_closure: {
+    "^": "Closure:12;this_0",
+    call$1: function($event) {
+      var t1, t2, t3, i, t4, t5, t6;
+      t1 = this.this_0;
+      t2 = J.getInterceptor$x($event);
+      t3 = t2.get$client($event);
+      t1.mouse_x = t3.get$x(t3);
+      t2 = t2.get$client($event);
+      t2 = t2.get$y(t2);
+      t1.mouse_y = t2;
+      t1.display_data = H.S(t1.mouse_x) + " | " + H.S(t2);
+      for (t2 = t1.cards, t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
+        t2._current.set$highlight(false);
+      for (i = t1.cards.length - 1; i >= 0; --i) {
+        t2 = t1.cards;
+        if (i >= t2.length)
+          return H.ioore(t2, i);
+        t2 = t2[i];
+        t3 = t1.mouse_x;
+        t4 = t1.mouse_y;
+        t5 = t2.x;
+        t6 = t2.HALF_WIDTH;
+        if (typeof t3 !== "number")
+          return t3.$gt();
+        if (t3 > t5 - t6)
+          if (t3 < t5 + t6) {
+            t3 = t2.y;
+            t2 = t2.HALF_HEIGHT;
+            if (typeof t3 !== "number")
+              return t3.$sub();
+            if (typeof t4 !== "number")
+              return t4.$gt();
+            t2 = t4 > t3 - t2 && t4 < t3 + t2;
+          } else
+            t2 = false;
+        else
+          t2 = false;
+        if (t2) {
+          t2 = t1.cards;
+          if (i >= t2.length)
+            return H.ioore(t2, i);
+          t2[i].highlight = true;
+          break;
+        }
+      }
+    }
+  },
+  Controller_populate_hand_closure: {
+    "^": "Closure:10;",
+    call$1: function(fileContents) {
+      var ctrl, json_data, t1, cards_num, i, data, t2, y, t3;
+      ctrl = F.Controller_get();
+      json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
+      t1 = J.getInterceptor$asx(json_data);
+      cards_num = t1.get$length(json_data);
+      for (t1 = t1.get$iterator(json_data), i = 0; t1.moveNext$0();) {
+        data = t1.get$current();
+        ++i;
+        t2 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
+        if (typeof cards_num !== "number")
+          return cards_num.$add();
+        if (typeof t2 !== "number")
+          return t2.$div();
+        y = J.get$height$x(ctrl.canvas);
+        t3 = J.getInterceptor$asx(data);
+        ctrl.cards.push(new G.Card(t2 / (cards_num + 1), y, false, 100, 150, t3.$index(data, "value"), t3.$index(data, "suit")));
+      }
+    }
   }
 }],
 ["dart._internal", "dart:_internal", , H, {
@@ -3166,7 +3298,7 @@ var $$ = {};
       t1._asyncCompleteError$2(error, stackTrace);
     }, function(error) {
       return this.completeError$2(error, null);
-    }, "completeError$1", "call$2", "call$1", "get$completeError", 2, 2, 11, 12]
+    }, "completeError$1", "call$2", "call$1", "get$completeError", 2, 2, 13, 14]
   },
   _SyncCompleter: {
     "^": "_Completer;future"
@@ -3259,7 +3391,7 @@ var $$ = {};
       P._Future__propagateToListeners(this, listeners);
     }, function(error) {
       return this._completeError$2(error, null);
-    }, "_completeError$1", "call$2", "call$1", "get$_completeError", 2, 2, 13, 12],
+    }, "_completeError$1", "call$2", "call$1", "get$_completeError", 2, 2, 15, 14],
     _asyncComplete$1: function(value) {
       var t1;
       if (this._state !== 0)
@@ -3427,7 +3559,7 @@ var $$ = {};
     }
   },
   _Future__chainForeignFuture_closure0: {
-    "^": "Closure:14;target_1",
+    "^": "Closure:16;target_1",
     call$2: function(error, stackTrace) {
       this.target_1._completeError$2(error, stackTrace);
     },
@@ -3454,7 +3586,7 @@ var $$ = {};
     }
   },
   _Future__propagateToListeners_handleValueCallback: {
-    "^": "Closure:15;box_1,listener_3,sourceValue_4,zone_5",
+    "^": "Closure:17;box_1,listener_3,sourceValue_4,zone_5",
     call$0: function() {
       var e, s, t1, t2, exception;
       try {
@@ -3586,7 +3718,7 @@ var $$ = {};
     }
   },
   _Future__propagateToListeners_handleWhenCompleteCallback_closure0: {
-    "^": "Closure:14;box_0,listener_12",
+    "^": "Closure:16;box_0,listener_12",
     call$2: function(error, stackTrace) {
       var t1, completeResult;
       t1 = this.box_0;
@@ -3679,7 +3811,7 @@ var $$ = {};
     }
   },
   _cancelAndErrorClosure_closure: {
-    "^": "Closure:16;subscription_0,future_1",
+    "^": "Closure:18;subscription_0,future_1",
     call$2: function(error, stackTrace) {
       return P._cancelAndError(this.subscription_0, this.future_1, error, stackTrace);
     }
@@ -5165,7 +5297,7 @@ var $$ = {};
     H.printString(line);
   },
   NoSuchMethodError_toString_closure: {
-    "^": "Closure:17;box_0",
+    "^": "Closure:19;box_0",
     call$2: function(key, value) {
       var t1 = this.box_0;
       if (t1.i_1 > 0)
@@ -5274,7 +5406,7 @@ var $$ = {};
       }}
   },
   Duration_toString_sixDigits: {
-    "^": "Closure:18;",
+    "^": "Closure:20;",
     call$1: function(n) {
       if (n >= 100000)
         return "" + n;
@@ -5290,7 +5422,7 @@ var $$ = {};
     }
   },
   Duration_toString_twoDigits: {
-    "^": "Closure:18;",
+    "^": "Closure:20;",
     call$1: function(n) {
       if (n >= 10)
         return "" + n;
@@ -6197,59 +6329,19 @@ var $$ = {};
 ["", "main.dart", , F, {
   "^": "",
   main: [function() {
-    var t1, ctrl, t2, t3, ctx, old_now;
-    t1 = {};
+    var ctrl, t1;
     ctrl = F.Controller_get();
-    t2 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.main_closure(ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
-    t1.display_data_0 = "test";
-    t1.display_fps_1 = "";
-    ctrl.mouse_x = 0;
-    ctrl.mouse_y = 0;
-    t2 = document.querySelector("#draw > canvas");
-    ctrl.canvas = t2;
-    t3 = window.innerWidth;
-    if (typeof t3 !== "number")
-      return t3.$sub();
-    J.set$width$x(t2, t3 - 5);
-    t3 = ctrl.canvas;
-    t2 = window.innerHeight;
-    if (typeof t2 !== "number")
-      return t2.$sub();
-    J.set$height$x(t3, t2 - 5);
-    ctx = J.get$context2D$x(ctrl.canvas);
-    t2 = J.get$onMouseMove$x(ctrl.canvas);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.main_closure0(t1, ctrl)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
-    W.HttpRequest_getString("http://sloosh.no-ip.org:8000/hand/", null, null).then$1(new F.main_closure1());
-    old_now = new P.DateTime(Date.now(), false);
-    old_now.DateTime$_now$0();
-    t1.old_now_2 = old_now;
-    t1.frames_3 = 0;
-    C.Window_methods.get$animationFrame(window).then$1(new F.main_draw(t1, ctrl, ctx));
+    t1 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.main_closure(ctrl)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+    ctrl.add_listeners$0();
+    ctrl.populate_hand$0();
+    C.Window_methods.get$animationFrame(window).then$1(ctrl.get$render());
   }, "call$0", "main$closure", 0, 0, 1],
-  load_cards: function(data_json) {
-    var ctrl, t1, cards_num, i, data, t2, y, t3;
-    ctrl = F.Controller_get();
-    t1 = J.getInterceptor$asx(data_json);
-    cards_num = t1.get$length(data_json);
-    for (t1 = t1.get$iterator(data_json), i = 0; t1.moveNext$0();) {
-      data = t1.get$current();
-      ++i;
-      t2 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
-      if (typeof cards_num !== "number")
-        return cards_num.$add();
-      if (typeof t2 !== "number")
-        return t2.$div();
-      y = J.get$height$x(ctrl.canvas);
-      t3 = J.getInterceptor$asx(data);
-      $.get$cards().push(new G.Card(t2 / (cards_num + 1), y, false, 100, 150, t3.$index(data, "value"), t3.$index(data, "suit")));
-    }
-  },
   main_closure: {
-    "^": "Closure:8;ctrl_1",
+    "^": "Closure:8;ctrl_0",
     call$1: function(e) {
       var t1, t2, t3;
-      t1 = this.ctrl_1;
+      t1 = this.ctrl_0;
       t2 = t1.canvas;
       t3 = window.innerWidth;
       if (typeof t3 !== "number")
@@ -6261,91 +6353,6 @@ var $$ = {};
         return t3.$sub();
       J.set$height$x(t1, t3 - 5);
     }
-  },
-  main_closure0: {
-    "^": "Closure:19;box_0,ctrl_2",
-    call$1: function($event) {
-      var t1, t2, t3, i, t4, t5, t6;
-      t1 = this.ctrl_2;
-      t2 = J.getInterceptor$x($event);
-      t3 = t2.get$client($event);
-      t1.mouse_x = t3.get$x(t3);
-      t2 = t2.get$client($event);
-      t2 = t2.get$y(t2);
-      t1.mouse_y = t2;
-      this.box_0.display_data_0 = H.S(t1.mouse_x) + " | " + H.S(t2);
-      for (t2 = $.get$cards(), t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
-        t2._current.set$highlight(false);
-      for (i = $.get$cards().length - 1; i >= 0; --i) {
-        t2 = $.get$cards();
-        if (i >= t2.length)
-          return H.ioore(t2, i);
-        t2 = t2[i];
-        t3 = t1.mouse_x;
-        t4 = t1.mouse_y;
-        t5 = t2.x;
-        t6 = t2.HALF_WIDTH;
-        if (typeof t3 !== "number")
-          return t3.$gt();
-        if (t3 > t5 - t6)
-          if (t3 < t5 + t6) {
-            t3 = t2.y;
-            t2 = t2.HALF_HEIGHT;
-            if (typeof t3 !== "number")
-              return t3.$sub();
-            if (typeof t4 !== "number")
-              return t4.$gt();
-            t2 = t4 > t3 - t2 && t4 < t3 + t2;
-          } else
-            t2 = false;
-        else
-          t2 = false;
-        if (t2) {
-          t1 = $.get$cards();
-          if (i >= t1.length)
-            return H.ioore(t1, i);
-          t1[i].highlight = true;
-          break;
-        }
-      }
-    }
-  },
-  main_closure1: {
-    "^": "Closure:10;",
-    call$1: function(fileContents) {
-      var t1 = J.getInterceptor(fileContents);
-      P.print(t1.toString$0(fileContents));
-      F.load_cards(C.JsonCodec_null_null.decode$1(t1.toString$0(fileContents)));
-    }
-  },
-  main_draw: {
-    "^": "Closure:20;box_0,ctrl_3,ctx_4",
-    call$1: function(num) {
-      var now, t1, t2, t3;
-      now = new P.DateTime(Date.now(), false);
-      now.DateTime$_now$0();
-      t1 = this.ctx_4;
-      t1.save();
-      t1.setTransform(1, 0, 0, 1, 0, 0);
-      t2 = this.ctrl_3;
-      t1.clearRect(0, 0, J.get$width$x(t2.canvas), J.get$height$x(t2.canvas));
-      t1.restore();
-      t1.fillStyle = "#000000";
-      t1.font = "20px Georgia";
-      t1.textAlign = "left";
-      t2 = this.box_0;
-      C.CanvasRenderingContext2D_methods.fillText$3(t1, t2.display_data_0, 10, 30);
-      C.CanvasRenderingContext2D_methods.fillText$3(t1, t2.display_fps_1, 10, 50);
-      for (t3 = $.get$cards(), t3 = new H.ListIterator(t3, t3.length, 0, null); t3.moveNext$0();)
-        t3._current.render$1(t1);
-      if (now.millisecondsSinceEpoch - t2.old_now_2.millisecondsSinceEpoch > 1000) {
-        t2.display_fps_1 = "" + t2.frames_3 + " fps";
-        t2.frames_3 = 0;
-        t2.old_now_2 = now;
-      }
-      ++t2.frames_3;
-      C.Window_methods.get$animationFrame(window).then$1(this);
-    }
   }
 },
 1],
@@ -6355,9 +6362,11 @@ $$ = null;
 
 // Runtime type support
 P.$int.$is$int = true;
+P.$int.$isnum = true;
 P.$int.$isObject = true;
 P.String.$isString = true;
 P.String.$isObject = true;
+P.num.$isnum = true;
 P.num.$isObject = true;
 P.Duration.$isObject = true;
 P.Object.$isObject = true;
@@ -6377,6 +6386,8 @@ P.StackTrace.$isStackTrace = true;
 P.StackTrace.$isObject = true;
 P._EventSink.$is_EventSink = true;
 P._EventSink.$isObject = true;
+W.CanvasRenderingContext2D.$isCanvasRenderingContext2D = true;
+W.CanvasRenderingContext2D.$isObject = true;
 P.Function.$isFunction = true;
 P.Function.$isObject = true;
 // getInterceptor methods
@@ -6486,6 +6497,9 @@ J.addEventListener$3$x = function(receiver, a0, a1, a2) {
 };
 J.contains$1$asx = function(receiver, a0) {
   return J.getInterceptor$asx(receiver).contains$1(receiver, a0);
+};
+J.fillText$3$x = function(receiver, a0, a1, a2) {
+  return J.getInterceptor$x(receiver).fillText$3(receiver, a0, a1, a2);
 };
 J.forEach$1$ax = function(receiver, a0) {
   return J.getInterceptor$ax(receiver).forEach$1(receiver, a0);
@@ -6802,9 +6816,6 @@ Isolate.$lazy($, "_toStringVisiting", "_toStringVisiting", "get$_toStringVisitin
 Isolate.$lazy($, "_toStringList", "Maps__toStringList", "get$Maps__toStringList", function() {
   return [];
 });
-Isolate.$lazy($, "cards", "cards", "get$cards", function() {
-  return [];
-});
 // Native classes
 
 init.functionAliases = {};
@@ -6820,6 +6831,8 @@ init.metadata = [{func: "void__void_", void: true, args: [{func: "void_", void: 
 {func: "args1", args: [null]},
 {func: "dynamic__dynamic_String", args: [null, P.String]},
 {func: "dynamic__String", args: [P.String]},
+{func: "void__num", void: true, args: [P.num]},
+{func: "dynamic__MouseEvent", args: [W.MouseEvent]},
 {func: "void__Object__StackTrace", void: true, args: [P.Object], opt: [P.StackTrace]},
 ,
 {func: "void__dynamic__StackTrace", void: true, args: [null], opt: [P.StackTrace]},
@@ -6828,8 +6841,6 @@ init.metadata = [{func: "void__void_", void: true, args: [{func: "void_", void: 
 {func: "dynamic__dynamic_StackTrace", args: [null, P.StackTrace]},
 {func: "dynamic__Symbol_dynamic", args: [P.Symbol, null]},
 {func: "String__int", ret: P.String, args: [P.$int]},
-{func: "dynamic__MouseEvent", args: [W.MouseEvent]},
-{func: "void__dynamic", void: true, args: [null]},
 ];
 $ = null;
 Isolate = Isolate.$finishIsolateConstructor(Isolate);
