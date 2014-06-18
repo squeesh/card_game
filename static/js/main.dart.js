@@ -2813,22 +2813,96 @@ var $$ = {};
 ["card", "card.dart", , G, {
   "^": "",
   Card: {
-    "^": "Object;highlight?,value,suit",
+    "^": "Object;highlight@,value,suit",
     static: {"^": "Card_HALF_WIDTH,Card_HALF_HEIGHT"}
+  }
+}],
+["card_holder", "card_holder.dart", , S, {
+  "^": "",
+  CardHolder: {
+    "^": "Object;x>,y>,highlight@",
+    _draw$1: function(url) {
+      return W.HttpRequest_getString(url, null, null).then$1(new S.CardHolder__draw_closure());
+    },
+    render$1: function(ctrl) {
+      var ctx, t1, t2, t3, t4;
+      ctx = ctrl.ctx;
+      if (this.highlight)
+        ctx.strokeStyle = "#00BB00";
+      else
+        ctx.strokeStyle = "#000000";
+      t1 = this.x;
+      t2 = $.get$CardHolder_HALF_WIDTH();
+      if (typeof t2 !== "number")
+        return H.iae(t2);
+      t3 = this.y;
+      t4 = $.get$CardHolder_HALF_HEIGHT();
+      if (typeof t4 !== "number")
+        return H.iae(t4);
+      ctx.strokeRect(t1 - t2, t3 - t4, t2 * 2, t4 * 2);
+    },
+    on_mouse_move$1: function($event) {
+      var t1, t2, mouse_x, mouse_y;
+      t1 = J.getInterceptor$x($event);
+      t2 = t1.get$client($event);
+      mouse_x = t2.get$x(t2);
+      t1 = t1.get$client($event);
+      mouse_y = t1.get$y(t1);
+      t1 = this.x;
+      t2 = $.get$CardHolder_HALF_WIDTH();
+      if (typeof t2 !== "number")
+        return H.iae(t2);
+      if (typeof mouse_x !== "number")
+        return mouse_x.$gt();
+      if (mouse_x > t1 - t2)
+        if (mouse_x < t1 + t2) {
+          t1 = this.y;
+          t2 = $.get$CardHolder_HALF_HEIGHT();
+          if (typeof t2 !== "number")
+            return H.iae(t2);
+          if (typeof mouse_y !== "number")
+            return mouse_y.$gt();
+          t1 = mouse_y > t1 - t2 && mouse_y < t1 + t2;
+        } else
+          t1 = false;
+      else
+        t1 = false;
+      if (t1)
+        this.highlight = true;
+      else
+        this.highlight = false;
+    }
+  },
+  CardHolder__draw_closure: {
+    "^": "Closure:10;",
+    call$1: function(fileContents) {
+      var json_data, t1;
+      json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
+      t1 = J.getInterceptor$asx(json_data);
+      return new G.Card(false, t1.$index(json_data, "value"), t1.$index(json_data, "suit"));
+    }
+  },
+  Deck: {
+    "^": "CardHolder;x,y,highlight"
+  },
+  Pile: {
+    "^": "CardHolder;x,y,highlight"
   }
 }],
 ["controller", "controller.dart", , F, {
   "^": "",
   Controller: {
-    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,frame_count,old_now",
+    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,deck,pile,frame_count,old_now",
     add_listeners$0: function() {
       var t1 = J.get$onMouseMove$x(this.canvas);
       H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
-      t1 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
+      t1 = J.get$onMouseDown$x(this.canvas);
       H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure0(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+      t1 = H.setRuntimeTypeInfo(new W._EventStream(window, C.EventStreamProvider_resize._eventType, false), [null]);
+      H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure1(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
     },
     render$1: [function(time) {
-      var t1, now, t2;
+      var t1, now, t2, ctx, t3, t4, t5;
       t1 = Date.now();
       now = new P.DateTime(t1, false);
       now.DateTime$_now$0();
@@ -2843,6 +2917,19 @@ var $$ = {};
       J.fillText$3$x(t2, this.display_data, 10, 30);
       J.fillText$3$x(this.ctx, this.display_fps, 10, 50);
       this.player_1_hand.render$1(this);
+      t2 = this.deck;
+      S.CardHolder.prototype.render$1.call(t2, this);
+      ctx = this.ctx;
+      if (t2.highlight)
+        ctx.fillStyle = "#999900";
+      else
+        ctx.fillStyle = "#660000";
+      t3 = t2.x;
+      t4 = $.Card_HALF_WIDTH;
+      t2 = t2.y;
+      t5 = $.Card_HALF_HEIGHT;
+      ctx.fillRect(t3 - t4, t2 - t5, t4 * 2, t5 * 2);
+      this.pile.render$1(this);
       if (t1 - this.old_now.millisecondsSinceEpoch > 1000) {
         this.display_fps = "" + this.frame_count + " fps";
         this.frame_count = 0;
@@ -2852,7 +2939,7 @@ var $$ = {};
       C.Window_methods.get$animationFrame(window).then$1(this.get$render());
     }, "call$1", "get$render", 2, 0, 11],
     Controller$0: function() {
-      var t1, t2;
+      var t1, t2, t3;
       this.mouse_x = 0;
       this.mouse_y = 0;
       this.frame_count = 0;
@@ -2874,11 +2961,27 @@ var $$ = {};
       t1 = new A.Hand(null, null, null);
       t1.Hand$2(0, J.get$height$x(this.canvas));
       this.player_1_hand = t1;
+      t1 = J.get$width$x(this.canvas);
+      if (typeof t1 !== "number")
+        return t1.$div();
+      t2 = $.Card_HALF_WIDTH;
+      t3 = J.get$height$x(this.canvas);
+      if (typeof t3 !== "number")
+        return t3.$div();
+      this.deck = new S.Deck(t1 / 2 - t2 - 10, t3 / 2, false);
+      t3 = J.get$width$x(this.canvas);
+      if (typeof t3 !== "number")
+        return t3.$div();
+      t2 = $.Card_HALF_WIDTH;
+      t1 = J.get$height$x(this.canvas);
+      if (typeof t1 !== "number")
+        return t1.$div();
+      this.pile = new S.Pile(t3 / 2 + t2 + 10, t1 / 2, false);
     },
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
         if (t1 == null) {
-          t1 = new F.Controller(null, null, null, null, "", "", null, null, null);
+          t1 = new F.Controller(null, null, null, null, "", "", null, null, null, null, null);
           t1.Controller$0();
           $.Controller__ctrl = t1;
         }
@@ -2888,27 +2991,47 @@ var $$ = {};
   Controller_add_listeners_closure: {
     "^": "Closure:12;this_0",
     call$1: function($event) {
-      var t1, t2, t3, hovered_card;
+      var t1, t2, t3;
       t1 = this.this_0;
       t2 = J.getInterceptor$x($event);
       t3 = t2.get$client($event);
       t1.mouse_x = t3.get$x(t3);
       t2 = t2.get$client($event);
-      t2 = t2.get$y(t2);
-      t1.mouse_y = t2;
-      t1.display_data = H.S(t1.mouse_x) + " | " + H.S(t2);
-      for (t2 = t1.player_1_hand.cards, t2 = new H.ListIterator(t2, t2.length, 0, null); t2.moveNext$0();)
-        t2._current.set$highlight(false);
-      hovered_card = t1.player_1_hand.get_hovered_card$2(t1.mouse_x, t1.mouse_y);
-      if (hovered_card != null)
-        hovered_card.highlight = true;
+      t1.mouse_y = t2.get$y(t2);
+      t1.display_data = H.S(t1.mouse_x) + " | " + H.S(t1.mouse_y);
+      t1.player_1_hand.on_mouse_move$1($event);
+      t1.deck.on_mouse_move$1($event);
+      t1.pile.on_mouse_move$1($event);
     }
   },
   Controller_add_listeners_closure0: {
-    "^": "Closure:8;this_1",
+    "^": "Closure:12;this_1",
+    call$1: function($event) {
+      var t1, clicked_card, t2, after_action;
+      t1 = this.this_1;
+      clicked_card = t1.player_1_hand.get_highlighted_card$0();
+      if (clicked_card != null) {
+        t2 = t1.player_1_hand.cards;
+        after_action = W.HttpRequest_getString("http://squeesh.net:8000/discard/" + H.Lists_indexOf(t2, clicked_card, 0, t2.length) + "/", null, null);
+      } else {
+        t2 = t1.deck;
+        after_action = t2.highlight ? t2._draw$1("http://squeesh.net:8000/draw-deck/") : null;
+      }
+      if (after_action != null)
+        after_action.then$1(new F.Controller_add_listeners__closure(t1));
+    }
+  },
+  Controller_add_listeners__closure: {
+    "^": "Closure:8;this_2",
+    call$1: function(obj) {
+      this.this_2.player_1_hand.fetch$0();
+    }
+  },
+  Controller_add_listeners_closure1: {
+    "^": "Closure:8;this_3",
     call$1: function(e) {
       var t1, t2, t3;
-      t1 = this.this_1;
+      t1 = this.this_3;
       t2 = t1.canvas;
       t3 = window.innerWidth;
       if (typeof t3 !== "number")
@@ -2979,6 +3102,18 @@ var $$ = {};
           return H.ioore(src, i);
         C.JSArray_methods.$indexSet(dst, j, src[i]);
       }
+  },
+  Lists_indexOf: function(a, element, startIndex, endIndex) {
+    var i;
+    if (startIndex >= a.length)
+      return -1;
+    for (i = startIndex; i < endIndex; ++i) {
+      if (i >= a.length)
+        return H.ioore(a, i);
+      if (J.$eq(a[i], element))
+        return i;
+    }
+    return -1;
   },
   Symbol_getName: function(symbol) {
     return symbol.get$_name();
@@ -5701,6 +5836,9 @@ var $$ = {};
     toString$0: function(receiver) {
       return receiver.localName;
     },
+    get$onMouseDown: function(receiver) {
+      return H.setRuntimeTypeInfo(new W._ElementEventStreamImpl(receiver, C.EventStreamProvider_mousedown._eventType, false), [null]);
+    },
     get$onMouseMove: function(receiver) {
       return H.setRuntimeTypeInfo(new W._ElementEventStreamImpl(receiver, C.EventStreamProvider_mousemove._eventType, false), [null]);
     },
@@ -6028,6 +6166,9 @@ var $$ = {};
   },
   SvgElement: {
     "^": "Element;",
+    get$onMouseDown: function(receiver) {
+      return H.setRuntimeTypeInfo(new W._ElementEventStreamImpl(receiver, C.EventStreamProvider_mousedown._eventType, false), [null]);
+    },
     get$onMouseMove: function(receiver) {
       return H.setRuntimeTypeInfo(new W._ElementEventStreamImpl(receiver, C.EventStreamProvider_mousemove._eventType, false), [null]);
     },
@@ -6263,8 +6404,8 @@ var $$ = {};
   "^": "",
   Hand: {
     "^": "Object;x>,y>,cards",
-    populate$0: function() {
-      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.Hand_populate_closure(this));
+    fetch$0: function() {
+      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.Hand_fetch_closure(this));
     },
     render$1: function(ctrl) {
       var cards_num, t1, i, t2, curr_card, t3, card_x, ctx, offset, t4, t5, t6;
@@ -6281,13 +6422,7 @@ var $$ = {};
           return t3.$div();
         card_x = t2 + t3 / t1;
         t3 = this.y;
-        t2 = $.Controller__ctrl;
-        if (t2 == null) {
-          t2 = new F.Controller(null, null, null, null, "", "", null, null, null);
-          t2.Controller$0();
-          $.Controller__ctrl = t2;
-        }
-        ctx = t2.ctx;
+        ctx = ctrl.ctx;
         if (curr_card.highlight) {
           ctx.fillStyle = "#ccccdd";
           offset = 30;
@@ -6320,7 +6455,7 @@ var $$ = {};
         ctx.fillText(t2, card_x, t3 - offset);
       }
     },
-    get_hovered_card$2: function(mouse_x, mouse_y) {
+    _get_hovered_card$2: function(mouse_x, mouse_y) {
       var ctrl, card_y, cards_num, i, t1, t2, curr_card, t3, card_x;
       ctrl = F.Controller_get();
       card_y = this.y;
@@ -6355,29 +6490,46 @@ var $$ = {};
       }
       return;
     },
+    get_highlighted_card$0: function() {
+      var t1, card;
+      for (t1 = this.cards, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();) {
+        card = t1._current;
+        if (card.get$highlight())
+          return card;
+      }
+      return;
+    },
+    on_mouse_move$1: function($event) {
+      var t1, t2, mx, my, hovered_card;
+      t1 = J.getInterceptor$x($event);
+      t2 = t1.get$client($event);
+      mx = t2.get$x(t2);
+      t1 = t1.get$client($event);
+      my = t1.get$y(t1);
+      for (t1 = this.cards, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();)
+        t1._current.set$highlight(false);
+      hovered_card = this._get_hovered_card$2(mx, my);
+      if (hovered_card != null)
+        hovered_card.highlight = true;
+    },
     Hand$2: function(x, y) {
       this.x = x;
       this.y = y;
       this.cards = [];
     }
   },
-  Hand_populate_closure: {
+  Hand_fetch_closure: {
     "^": "Closure:10;this_0",
     call$1: function(fileContents) {
-      var ctrl, json_data, t1, cards_num, t2, i, data, t3;
-      ctrl = F.Controller_get();
+      var json_data, t1, t2, data, t3;
+      F.Controller_get();
       json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
       t1 = J.getInterceptor$asx(json_data);
-      cards_num = t1.get$length(json_data);
-      for (t1 = t1.get$iterator(json_data), t2 = this.this_0, i = 0; t1.moveNext$0();) {
+      t1.get$length(json_data);
+      t2 = this.this_0;
+      t2.cards = [];
+      for (t1 = t1.get$iterator(json_data); t1.moveNext$0();) {
         data = t1.get$current();
-        ++i;
-        t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
-        if (typeof cards_num !== "number")
-          return cards_num.$add();
-        if (typeof t3 !== "number")
-          return t3.$div();
-        J.get$height$x(ctrl.canvas);
         t3 = J.getInterceptor$asx(data);
         t2.cards.push(new G.Card(false, t3.$index(data, "value"), t3.$index(data, "suit")));
       }
@@ -6389,7 +6541,7 @@ var $$ = {};
   main: [function() {
     var ctrl = F.Controller_get();
     ctrl.add_listeners$0();
-    ctrl.player_1_hand.populate$0();
+    ctrl.player_1_hand.fetch$0();
     C.Window_methods.get$animationFrame(window).then$1(ctrl.get$render());
   }, "call$0", "main$closure", 0, 0, 1]
 },
@@ -6560,6 +6712,9 @@ J.get$iterator$ax = function(receiver) {
 J.get$length$asx = function(receiver) {
   return J.getInterceptor$asx(receiver).get$length(receiver);
 };
+J.get$onMouseDown$x = function(receiver) {
+  return J.getInterceptor$x(receiver).get$onMouseDown(receiver);
+};
 J.get$onMouseMove$x = function(receiver) {
   return J.getInterceptor$x(receiver).get$onMouseMove(receiver);
 };
@@ -6601,6 +6756,7 @@ C.C__RootZone = new P._RootZone();
 C.Duration_0 = new P.Duration(0);
 C.EventStreamProvider_error = new W.EventStreamProvider("error");
 C.EventStreamProvider_load = new W.EventStreamProvider("load");
+C.EventStreamProvider_mousedown = new W.EventStreamProvider("mousedown");
 C.EventStreamProvider_mousemove = new W.EventStreamProvider("mousemove");
 C.EventStreamProvider_resize = new W.EventStreamProvider("resize");
 C.JS_CONST_0 = function(hooks) {
@@ -6842,6 +6998,12 @@ Isolate.$lazy($, "undefinedLiteralPropertyPattern", "TypeErrorDecoder_undefinedL
     }
 
   }());
+});
+Isolate.$lazy($, "HALF_WIDTH", "CardHolder_HALF_WIDTH", "get$CardHolder_HALF_WIDTH", function() {
+  return $.Card_HALF_WIDTH + 5;
+});
+Isolate.$lazy($, "HALF_HEIGHT", "CardHolder_HALF_HEIGHT", "get$CardHolder_HALF_HEIGHT", function() {
+  return $.Card_HALF_HEIGHT + 5;
 });
 Isolate.$lazy($, "_toStringList", "IterableMixinWorkaround__toStringList", "get$IterableMixinWorkaround__toStringList", function() {
   return [];

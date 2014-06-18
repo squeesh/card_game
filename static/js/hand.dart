@@ -1,10 +1,12 @@
 library hand;
 
 import 'dart:html';
+import 'dart:async';
 import 'dart:convert';
 
 import 'controller.dart';
 import 'card.dart';
+import 'settings.dart';
 
 class Hand {
   num x;
@@ -17,22 +19,24 @@ class Hand {
     this.cards = [];
   }
   
-  void populate() {
-    HttpRequest.getString("http://squeesh.net:8000/hand/").then((String fileContents) {
+  void fetch() {
+    HttpRequest.getString("$HOST/hand/").then((String fileContents) {
       Controller ctrl = Controller.get();
       
       var json_data = JSON.decode(fileContents.toString());
       num cards_num = json_data.length;
 
-      num i = 0;
+      this.cards = [];
+      
       for(var data in json_data) {
-        num x = ctrl.canvas.width * (i + 1) / (cards_num + 1.0);
-        num y = ctrl.canvas.height;
-        
         this.cards.add(new Card(data['value'], data['suit']));
-        i += 1;
       }
     });
+  }
+  
+  Future discard(Card card) {
+    num card_pos = this.cards.indexOf(card);
+    return HttpRequest.getString("$HOST/discard/$card_pos/");
   }
   
   void render(Controller ctrl) {
@@ -47,7 +51,7 @@ class Hand {
     }
   }
   
-  Card get_hovered_card(num mouse_x, num mouse_y) {
+  Card _get_hovered_card(num mouse_x, num mouse_y) {
     Controller ctrl = Controller.get();
 
     num card_y = this.y;
@@ -66,5 +70,30 @@ class Hand {
     }
     
     return null;
+  }
+  
+  Card get_highlighted_card() {
+    for(Card card in this.cards){
+      if(card.highlight == true) {
+        return card;
+      }
+    }
+    
+    return null;
+  }
+  
+  void on_mouse_move(MouseEvent event) {
+    num mx = event.client.x;
+    num my = event.client.y;
+
+    for(Card card in this.cards) {
+      card.highlight = false;
+    }
+
+    Card hovered_card = this._get_hovered_card(mx, my);
+    
+    if(hovered_card != null) {
+      hovered_card.highlight = true;
+    }
   }
 }

@@ -16,7 +16,6 @@ class Card {
   Card(this.value, this.suit);
   
   void render(Controller ctrl, num x, num y) {
-    Controller ctrl = Controller.get();
     CanvasRenderingContext2D ctx = ctrl.ctx;
     
     num offset = 0;

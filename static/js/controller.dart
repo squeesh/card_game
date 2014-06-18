@@ -1,9 +1,11 @@
 library controller;
 
 import 'dart:html';
+import 'dart:async';
 
 import 'card.dart';
 import 'hand.dart';
+import 'card_holder.dart';
 
 
 class Controller {
@@ -17,7 +19,9 @@ class Controller {
   String display_fps = "";
   
   Hand player_1_hand;
-
+  Deck deck;
+  Pile pile;
+  
   num frame_count;
   
   DateTime old_now;
@@ -38,7 +42,8 @@ class Controller {
     this.ctx = this.canvas.context2D;
     
     this.player_1_hand = new Hand(0, this.canvas.height);
-
+    this.deck = new Deck(this.canvas.width / 2.0 - Card.HALF_WIDTH - 10, this.canvas.height / 2.0);
+    this.pile = new Pile(this.canvas.width / 2.0 + Card.HALF_WIDTH + 10, this.canvas.height / 2.0);
   }
   
   void add_listeners() {
@@ -46,19 +51,28 @@ class Controller {
       this.mouse_x = event.client.x; 
       this.mouse_y = event.client.y; 
       
-      num mx = this.mouse_x;
-      num my = this.mouse_y;
+      this.display_data = "$mouse_x | $mouse_y";
       
-      this.display_data = "$mx | $my";
+      this.player_1_hand.on_mouse_move(event);
+      this.deck.on_mouse_move(event);
+      this.pile.on_mouse_move(event);
+    });
+    
+    this.canvas.onMouseDown.listen((MouseEvent event) {
+      Card clicked_card = this.player_1_hand.get_highlighted_card();
+      Future after_action = null;
       
-      for(Card card in this.player_1_hand.cards) {
-        card.highlight = false;
+      if(clicked_card != null) {
+        // this.display_data = clicked_card.value + clicked_card.suit;
+        after_action = this.player_1_hand.discard(clicked_card);
+      } else if (this.deck.highlight == true) {
+        after_action = this.deck.draw();
       }
-
-      Card hovered_card = this.player_1_hand.get_hovered_card(this.mouse_x, this.mouse_y);
       
-      if(hovered_card != null) {
-        hovered_card.highlight = true;
+      if(after_action != null) {
+        after_action.then((dynamic obj) {
+          this.player_1_hand.fetch();
+        });
       }
     });
     
@@ -70,8 +84,8 @@ class Controller {
     });
   }
   
-  void populate_hand() {
-    this.player_1_hand.populate();
+  void fetch_hand() {
+    this.player_1_hand.fetch();
   }
   
   static Controller get() {
@@ -101,6 +115,8 @@ class Controller {
     this.ctx.fillText(this.display_fps, 10, 50);
 
     this.player_1_hand.render(this);
+    this.deck.render(this);
+    this.pile.render(this);
 
     if(now.millisecondsSinceEpoch - old_now.millisecondsSinceEpoch > 1000) {
       this.display_fps = "$frame_count fps";

@@ -9,7 +9,7 @@ void main() {
   CanvasRenderingContext2D ctx = ctrl.ctx;
   
   ctrl.add_listeners();
-  ctrl.populate_hand();
+  ctrl.fetch_hand();
 
   window.animationFrame.then(ctrl.render);
 }
