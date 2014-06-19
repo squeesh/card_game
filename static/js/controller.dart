@@ -46,6 +46,11 @@ class Controller {
     this.pile = new Pile(this.canvas.width / 2.0 + Card.HALF_WIDTH + 10, this.canvas.height / 2.0);
   }
   
+  void init() {
+    this.add_listeners();
+    this.fetch_hand();
+  }
+  
   void add_listeners() {
     this.canvas.onMouseMove.listen((MouseEvent event) {
       this.mouse_x = event.client.x; 
@@ -67,11 +72,14 @@ class Controller {
         after_action = this.player_1_hand.discard(clicked_card);
       } else if (this.deck.highlight == true) {
         after_action = this.deck.draw();
+      } else if (this.pile.highlight == true) {
+        after_action = this.pile.draw();
       }
       
       if(after_action != null) {
         after_action.then((dynamic obj) {
           this.player_1_hand.fetch();
+          this.pile.fetch();
         });
       }
     });

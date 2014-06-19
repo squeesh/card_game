@@ -2814,6 +2814,36 @@ var $$ = {};
   "^": "",
   Card: {
     "^": "Object;highlight@,value,suit",
+    render$3: function(ctrl, x, y) {
+      var ctx, t1, t2, t3;
+      ctx = ctrl.ctx;
+      if (this.highlight)
+        ctx.fillStyle = "#ccccdd";
+      else
+        ctx.fillStyle = "#cccccc";
+      t1 = $.Card_HALF_WIDTH;
+      t2 = $.Card_HALF_HEIGHT;
+      ctx.fillRect(x - t1, y - t2, t1 * 2, t2 * 2);
+      ctx.strokeStyle = "#000000";
+      t2 = $.Card_HALF_WIDTH;
+      t1 = $.Card_HALF_HEIGHT;
+      ctx.strokeRect(x - t2, y - t1, t2 * 2, t1 * 2);
+      t1 = this.suit;
+      if (C.JSArray_methods.contains$1(["\u2665", "\u2666"], t1))
+        ctx.fillStyle = "#AA0000";
+      else
+        ctx.fillStyle = "#000000";
+      ctx.font = "20px Georgia";
+      ctx.textAlign = "left";
+      t2 = this.value;
+      t3 = J.getInterceptor$ns(t2);
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, t3.$add(t2, t1), x - $.Card_HALF_WIDTH + 5, y - $.Card_HALF_HEIGHT + 20);
+      ctx.textAlign = "right";
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, t3.$add(t2, t1), x + $.Card_HALF_WIDTH - 5, y + $.Card_HALF_HEIGHT - 10);
+      ctx.font = "50px Georgia";
+      ctx.textAlign = "center";
+      C.CanvasRenderingContext2D_methods.fillText$3(ctx, t1, x, y + 20);
+    },
     static: {"^": "Card_HALF_WIDTH,Card_HALF_HEIGHT"}
   }
 }],
@@ -2821,8 +2851,8 @@ var $$ = {};
   "^": "",
   CardHolder: {
     "^": "Object;x>,y>,highlight@",
-    _draw$1: function(url) {
-      return W.HttpRequest_getString(url, null, null).then$1(new S.CardHolder__draw_closure());
+    _get_card_from_url$1: function(url) {
+      return W.HttpRequest_getString(url, null, null).then$1(new S.CardHolder__get_card_from_url_closure());
     },
     render$1: function(ctrl) {
       var ctx, t1, t2, t3, t4;
@@ -2873,20 +2903,33 @@ var $$ = {};
         this.highlight = false;
     }
   },
-  CardHolder__draw_closure: {
+  CardHolder__get_card_from_url_closure: {
     "^": "Closure:10;",
     call$1: function(fileContents) {
       var json_data, t1;
       json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
-      t1 = J.getInterceptor$asx(json_data);
-      return new G.Card(false, t1.$index(json_data, "value"), t1.$index(json_data, "suit"));
+      if (json_data != null) {
+        t1 = J.getInterceptor$asx(json_data);
+        return new G.Card(false, t1.$index(json_data, "value"), t1.$index(json_data, "suit"));
+      } else
+        return;
     }
   },
   Deck: {
     "^": "CardHolder;x,y,highlight"
   },
   Pile: {
-    "^": "CardHolder;x,y,highlight"
+    "^": "CardHolder;top_card,x,y,highlight",
+    fetch$0: function() {
+      return this._get_card_from_url$1("http://squeesh.net:8000/pile/").then$1(new S.Pile_fetch_closure(this));
+    }
+  },
+  Pile_fetch_closure: {
+    "^": "Closure:11;this_0",
+    call$1: function(card) {
+      this.this_0.top_card = card;
+      return card;
+    }
   }
 }],
 ["controller", "controller.dart", , F, {
@@ -2929,7 +2972,11 @@ var $$ = {};
       t2 = t2.y;
       t5 = $.Card_HALF_HEIGHT;
       ctx.fillRect(t3 - t4, t2 - t5, t4 * 2, t5 * 2);
-      this.pile.render$1(this);
+      t5 = this.pile;
+      S.CardHolder.prototype.render$1.call(t5, this);
+      t2 = t5.top_card;
+      if (t2 != null)
+        t2.render$3(this, t5.x, t5.y);
       if (t1 - this.old_now.millisecondsSinceEpoch > 1000) {
         this.display_fps = "" + this.frame_count + " fps";
         this.frame_count = 0;
@@ -2937,7 +2984,7 @@ var $$ = {};
       }
       ++this.frame_count;
       C.Window_methods.get$animationFrame(window).then$1(this.get$render());
-    }, "call$1", "get$render", 2, 0, 11],
+    }, "call$1", "get$render", 2, 0, 12],
     Controller$0: function() {
       var t1, t2, t3;
       this.mouse_x = 0;
@@ -2976,7 +3023,9 @@ var $$ = {};
       t1 = J.get$height$x(this.canvas);
       if (typeof t1 !== "number")
         return t1.$div();
-      this.pile = new S.Pile(t3 / 2 + t2 + 10, t1 / 2, false);
+      t1 = new S.Pile(null, t3 / 2 + t2 + 10, t1 / 2, false);
+      t1.fetch$0();
+      this.pile = t1;
     },
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
@@ -2989,7 +3038,7 @@ var $$ = {};
       }}
   },
   Controller_add_listeners_closure: {
-    "^": "Closure:12;this_0",
+    "^": "Closure:13;this_0",
     call$1: function($event) {
       var t1, t2, t3;
       t1 = this.this_0;
@@ -3001,11 +3050,15 @@ var $$ = {};
       t1.display_data = H.S(t1.mouse_x) + " | " + H.S(t1.mouse_y);
       t1.player_1_hand.on_mouse_move$1($event);
       t1.deck.on_mouse_move$1($event);
-      t1.pile.on_mouse_move$1($event);
+      t1 = t1.pile;
+      S.CardHolder.prototype.on_mouse_move$1.call(t1, $event);
+      t2 = t1.top_card;
+      if (t2 != null)
+        t2.set$highlight(t1.highlight);
     }
   },
   Controller_add_listeners_closure0: {
-    "^": "Closure:12;this_1",
+    "^": "Closure:13;this_1",
     call$1: function($event) {
       var t1, clicked_card, t2, after_action;
       t1 = this.this_1;
@@ -3015,7 +3068,12 @@ var $$ = {};
         after_action = W.HttpRequest_getString("http://squeesh.net:8000/discard/" + H.Lists_indexOf(t2, clicked_card, 0, t2.length) + "/", null, null);
       } else {
         t2 = t1.deck;
-        after_action = t2.highlight ? t2._draw$1("http://squeesh.net:8000/draw-deck/") : null;
+        if (t2.highlight)
+          after_action = t2._get_card_from_url$1("http://squeesh.net:8000/draw-deck/");
+        else {
+          t2 = t1.pile;
+          after_action = t2.highlight ? t2._get_card_from_url$1("http://squeesh.net:8000/draw-pile/") : null;
+        }
       }
       if (after_action != null)
         after_action.then$1(new F.Controller_add_listeners__closure(t1));
@@ -3024,7 +3082,9 @@ var $$ = {};
   Controller_add_listeners__closure: {
     "^": "Closure:8;this_2",
     call$1: function(obj) {
-      this.this_2.player_1_hand.fetch$0();
+      var t1 = this.this_2;
+      t1.player_1_hand.fetch$0();
+      t1.pile.fetch$0();
     }
   },
   Controller_add_listeners_closure1: {
@@ -3366,7 +3426,7 @@ var $$ = {};
       t1._asyncCompleteError$2(error, stackTrace);
     }, function(error) {
       return this.completeError$2(error, null);
-    }, "completeError$1", "call$2", "call$1", "get$completeError", 2, 2, 13, 14]
+    }, "completeError$1", "call$2", "call$1", "get$completeError", 2, 2, 14, 15]
   },
   _SyncCompleter: {
     "^": "_Completer;future"
@@ -3459,7 +3519,7 @@ var $$ = {};
       P._Future__propagateToListeners(this, listeners);
     }, function(error) {
       return this._completeError$2(error, null);
-    }, "_completeError$1", "call$2", "call$1", "get$_completeError", 2, 2, 15, 14],
+    }, "_completeError$1", "call$2", "call$1", "get$_completeError", 2, 2, 16, 15],
     _asyncComplete$1: function(value) {
       var t1;
       if (this._state !== 0)
@@ -3627,7 +3687,7 @@ var $$ = {};
     }
   },
   _Future__chainForeignFuture_closure0: {
-    "^": "Closure:16;target_1",
+    "^": "Closure:17;target_1",
     call$2: function(error, stackTrace) {
       this.target_1._completeError$2(error, stackTrace);
     },
@@ -3654,7 +3714,7 @@ var $$ = {};
     }
   },
   _Future__propagateToListeners_handleValueCallback: {
-    "^": "Closure:17;box_1,listener_3,sourceValue_4,zone_5",
+    "^": "Closure:18;box_1,listener_3,sourceValue_4,zone_5",
     call$0: function() {
       var e, s, t1, t2, exception;
       try {
@@ -3786,7 +3846,7 @@ var $$ = {};
     }
   },
   _Future__propagateToListeners_handleWhenCompleteCallback_closure0: {
-    "^": "Closure:16;box_0,listener_12",
+    "^": "Closure:17;box_0,listener_12",
     call$2: function(error, stackTrace) {
       var t1, completeResult;
       t1 = this.box_0;
@@ -3879,7 +3939,7 @@ var $$ = {};
     }
   },
   _cancelAndErrorClosure_closure: {
-    "^": "Closure:18;subscription_0,future_1",
+    "^": "Closure:19;subscription_0,future_1",
     call$2: function(error, stackTrace) {
       return P._cancelAndError(this.subscription_0, this.future_1, error, stackTrace);
     }
@@ -5365,7 +5425,7 @@ var $$ = {};
     H.printString(line);
   },
   NoSuchMethodError_toString_closure: {
-    "^": "Closure:19;box_0",
+    "^": "Closure:20;box_0",
     call$2: function(key, value) {
       var t1 = this.box_0;
       if (t1.i_1 > 0)
@@ -5474,7 +5534,7 @@ var $$ = {};
       }}
   },
   Duration_toString_sixDigits: {
-    "^": "Closure:20;",
+    "^": "Closure:21;",
     call$1: function(n) {
       if (n >= 100000)
         return "" + n;
@@ -5490,7 +5550,7 @@ var $$ = {};
     }
   },
   Duration_toString_twoDigits: {
-    "^": "Closure:20;",
+    "^": "Closure:21;",
     call$1: function(n) {
       if (n >= 10)
         return "" + n;
@@ -6408,7 +6468,7 @@ var $$ = {};
       W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.Hand_fetch_closure(this));
     },
     render$1: function(ctrl) {
-      var cards_num, t1, i, t2, curr_card, t3, card_x, ctx, offset, t4, t5, t6;
+      var cards_num, t1, i, t2, curr_card, t3, offset, t4;
       cards_num = this.cards.length;
       for (t1 = cards_num + 1, i = 0; i < cards_num;) {
         t2 = this.cards;
@@ -6420,39 +6480,11 @@ var $$ = {};
         t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
         if (typeof t3 !== "number")
           return t3.$div();
-        card_x = t2 + t3 / t1;
-        t3 = this.y;
-        ctx = ctrl.ctx;
-        if (curr_card.highlight) {
-          ctx.fillStyle = "#ccccdd";
-          offset = 30;
-        } else {
-          ctx.fillStyle = "#cccccc";
-          offset = 0;
-        }
-        t2 = $.Card_HALF_WIDTH;
-        t4 = $.Card_HALF_HEIGHT;
-        if (typeof t3 !== "number")
-          return t3.$sub();
-        ctx.fillRect(card_x - t2, t3 - t4 - offset, t2 * 2, t4 * 2);
-        ctx.strokeStyle = "#000000";
-        t4 = $.Card_HALF_WIDTH;
-        t2 = $.Card_HALF_HEIGHT;
-        ctx.strokeRect(card_x - t4, t3 - t2 - offset, t4 * 2, t2 * 2);
-        t2 = curr_card.suit;
-        if (C.JSArray_methods.contains$1(["\u2665", "\u2666"], t2))
-          ctx.fillStyle = "#AA0000";
-        else
-          ctx.fillStyle = "#000000";
-        ctx.font = "20px Georgia";
-        ctx.textAlign = "left";
-        t4 = J.$add$ns(curr_card.value, t2);
-        t5 = $.Card_HALF_WIDTH;
-        t6 = $.Card_HALF_HEIGHT;
-        ctx.fillText(t4, card_x - t5 + 5, t3 - t6 + 20 - offset);
-        ctx.font = "50px Georgia";
-        ctx.textAlign = "center";
-        ctx.fillText(t2, card_x, t3 - offset);
+        offset = curr_card.highlight ? 30 : 0;
+        t4 = this.y;
+        if (typeof t4 !== "number")
+          return t4.$sub();
+        curr_card.render$3(ctrl, t2 + t3 / t1, t4 - offset);
       }
     },
     _get_hovered_card$2: function(mouse_x, mouse_y) {
@@ -6572,6 +6604,8 @@ P.Symbol.$isSymbol = true;
 P.Symbol.$isObject = true;
 P.bool.$isbool = true;
 P.bool.$isObject = true;
+G.Card.$isCard = true;
+G.Card.$isObject = true;
 P.StackTrace.$isStackTrace = true;
 P.StackTrace.$isObject = true;
 P._EventSink.$is_EventSink = true;
@@ -6742,6 +6776,7 @@ J.set$width$x = function(receiver, value) {
 J.toString$0 = function(receiver) {
   return J.getInterceptor(receiver).toString$0(receiver);
 };
+C.CanvasRenderingContext2D_methods = W.CanvasRenderingContext2D.prototype;
 C.HttpRequest_methods = W.HttpRequest.prototype;
 C.JSArray_methods = J.JSArray.prototype;
 C.JSInt_methods = J.JSInt.prototype;
@@ -7032,6 +7067,7 @@ init.metadata = [{func: "void__void_", void: true, args: [{func: "void_", void: 
 {func: "args1", args: [null]},
 {func: "dynamic__dynamic_String", args: [null, P.String]},
 {func: "dynamic__String", args: [P.String]},
+{func: "dynamic__Card", args: [G.Card]},
 {func: "void__num", void: true, args: [P.num]},
 {func: "dynamic__MouseEvent", args: [W.MouseEvent]},
 {func: "void__Object__StackTrace", void: true, args: [P.Object], opt: [P.StackTrace]},

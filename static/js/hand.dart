@@ -47,7 +47,13 @@ class Hand {
       
       num card_x = this.x + ctrl.canvas.width * (i + 1) / (cards_num + 1.0);
 
-      curr_card.render(ctrl, card_x, this.y);
+      num offset = 0;
+      
+      if(curr_card.highlight) {
+        offset = 30;
+      }
+      
+      curr_card.render(ctrl, card_x, this.y - offset);
     }
   }
   

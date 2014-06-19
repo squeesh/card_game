@@ -8,8 +8,7 @@ void main() {
 
   CanvasRenderingContext2D ctx = ctrl.ctx;
   
-  ctrl.add_listeners();
-  ctrl.fetch_hand();
-
+  ctrl.init();
+  
   window.animationFrame.then(ctrl.render);
 }
