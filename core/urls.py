@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^draw-pile/$',                'core.views.draw_pile',     name='core-draw_pile'),
     url(r'^discard/(?P<card_pos>\d+)/$','core.views.discard',       name='core-discard'),
     url(r'^pile/$',                     'core.views.view_pile',     name='core-view_pile'),
-    url(r'^card-pos-swap/(?P<pos_a>\d+)/(?P<pos_b>\d+)/$',
+    url(r'^swap/(?P<pos_a>\d+)/(?P<pos_b>\d+)/$',
                                         'core.views.card_pos_swap', name='core-card_pos_swap'),
 
     url(r'^admin/', include(admin.site.urls)),
