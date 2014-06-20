@@ -18,7 +18,8 @@ class Controller {
   String display_data = "";
   String display_fps = "";
   
-  Hand player_1_hand;
+  PlayerHand player_1_hand;
+  OpponentHand player_2_hand;
   Deck deck;
   Pile pile;
   
@@ -41,14 +42,16 @@ class Controller {
     this.canvas.height = window.innerHeight - 5;
     this.ctx = this.canvas.context2D;
     
-    this.player_1_hand = new Hand(0, this.canvas.height);
+    this.player_1_hand = new PlayerHand(0, this.canvas.height);
+    this.player_2_hand = new OpponentHand(0, 0);
     this.deck = new Deck(this.canvas.width / 2.0 - Card.HALF_WIDTH - 10, this.canvas.height / 2.0);
     this.pile = new Pile(this.canvas.width / 2.0 + Card.HALF_WIDTH + 10, this.canvas.height / 2.0);
   }
   
   void init() {
     this.add_listeners();
-    this.fetch_hand();
+    this.player_1_hand.fetch();
+    this.player_2_hand.fetch();
   }
   
   void add_listeners() {
@@ -92,10 +95,6 @@ class Controller {
     });
   }
   
-  void fetch_hand() {
-    this.player_1_hand.fetch();
-  }
-  
   static Controller get() {
     if(Controller._ctrl == null) {
       Controller._ctrl = new Controller();
@@ -123,6 +122,7 @@ class Controller {
     this.ctx.fillText(this.display_fps, 10, 50);
 
     this.player_1_hand.render(this);
+    this.player_2_hand.render(this);
     this.deck.render(this);
     this.pile.render(this);
 

@@ -8,12 +8,12 @@ import 'controller.dart';
 import 'card.dart';
 import 'settings.dart';
 
-class Hand {
+class PlayerHand {
   num x;
   num y;
   List<Card> cards = null;
   
-  Hand(num x, num y) {
+  PlayerHand(num x, num y) {
     this.x = x;
     this.y = y;
     this.cards = [];
@@ -103,3 +103,41 @@ class Hand {
     }
   }
 }
+
+class OpponentHand {
+  num x;
+  num y;
+  num card_count = 0;
+  
+  OpponentHand(this.x, this.y);
+  
+  void fetch() {
+    HttpRequest.getString("$HOST/opponent/").then((String fileContents) {
+      Controller ctrl = Controller.get();
+      
+      var json_data = JSON.decode(fileContents.toString());
+      this.card_count = json_data;
+    });
+  }
+  
+  void render(Controller ctrl) {
+    CanvasRenderingContext2D ctx = ctrl.ctx;       
+    num cards_num = this.card_count;
+    
+    for(num i=0; i < cards_num; i++) {
+      num card_x = this.x + ctrl.canvas.width * (i + 1) / (cards_num + 1.0);
+      ctx.fillStyle = '#660000';
+      ctx.fillRect(
+          card_x - Card.HALF_WIDTH, y - Card.HALF_HEIGHT,
+          Card.HALF_WIDTH * 2, Card.HALF_HEIGHT * 2
+      );
+      
+      ctx.strokeStyle = '#000000';
+      ctx.strokeRect(
+          card_x - Card.HALF_WIDTH, y - Card.HALF_HEIGHT,
+          Card.HALF_WIDTH * 2, Card.HALF_HEIGHT * 2
+      );
+    }
+  }
+}
+

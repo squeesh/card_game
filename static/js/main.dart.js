@@ -2935,7 +2935,7 @@ var $$ = {};
 ["controller", "controller.dart", , F, {
   "^": "",
   Controller: {
-    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,deck,pile,frame_count,old_now",
+    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,player_2_hand,deck,pile,frame_count,old_now",
     add_listeners$0: function() {
       var t1 = J.get$onMouseMove$x(this.canvas);
       H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
@@ -2960,6 +2960,7 @@ var $$ = {};
       J.fillText$3$x(t2, this.display_data, 10, 30);
       J.fillText$3$x(this.ctx, this.display_fps, 10, 50);
       this.player_1_hand.render$1(this);
+      this.player_2_hand.render$1(this);
       t2 = this.deck;
       S.CardHolder.prototype.render$1.call(t2, this);
       ctx = this.ctx;
@@ -3005,9 +3006,10 @@ var $$ = {};
         return t1.$sub();
       J.set$height$x(t2, t1 - 5);
       this.ctx = J.get$context2D$x(this.canvas);
-      t1 = new A.Hand(null, null, null);
-      t1.Hand$2(0, J.get$height$x(this.canvas));
+      t1 = new A.PlayerHand(null, null, null);
+      t1.PlayerHand$2(0, J.get$height$x(this.canvas));
       this.player_1_hand = t1;
+      this.player_2_hand = new A.OpponentHand(0, 0, 0);
       t1 = J.get$width$x(this.canvas);
       if (typeof t1 !== "number")
         return t1.$div();
@@ -3030,7 +3032,7 @@ var $$ = {};
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
         if (t1 == null) {
-          t1 = new F.Controller(null, null, null, null, "", "", null, null, null, null, null);
+          t1 = new F.Controller(null, null, null, null, "", "", null, null, null, null, null, null);
           t1.Controller$0();
           $.Controller__ctrl = t1;
         }
@@ -6462,10 +6464,10 @@ var $$ = {};
 }],
 ["hand", "hand.dart", , A, {
   "^": "",
-  Hand: {
+  PlayerHand: {
     "^": "Object;x>,y>,cards",
     fetch$0: function() {
-      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.Hand_fetch_closure(this));
+      W.HttpRequest_getString("http://squeesh.net:8000/hand/", null, null).then$1(new A.PlayerHand_fetch_closure(this));
     },
     render$1: function(ctrl) {
       var cards_num, t1, i, t2, curr_card, t3, offset, t4;
@@ -6544,13 +6546,13 @@ var $$ = {};
       if (hovered_card != null)
         hovered_card.highlight = true;
     },
-    Hand$2: function(x, y) {
+    PlayerHand$2: function(x, y) {
       this.x = x;
       this.y = y;
       this.cards = [];
     }
   },
-  Hand_fetch_closure: {
+  PlayerHand_fetch_closure: {
     "^": "Closure:10;this_0",
     call$1: function(fileContents) {
       var json_data, t1, t2, data, t3;
@@ -6566,6 +6568,46 @@ var $$ = {};
         t2.cards.push(new G.Card(false, t3.$index(data, "value"), t3.$index(data, "suit")));
       }
     }
+  },
+  OpponentHand: {
+    "^": "Object;x>,y>,card_count",
+    fetch$0: function() {
+      W.HttpRequest_getString("http://squeesh.net:8000/opponent/", null, null).then$1(new A.OpponentHand_fetch_closure(this));
+    },
+    render$1: function(ctrl) {
+      var ctx, cards_num, t1, i, t2, t3, card_x, t4;
+      ctx = ctrl.ctx;
+      cards_num = this.card_count;
+      if (typeof cards_num !== "number")
+        return H.iae(cards_num);
+      t1 = cards_num + 1;
+      i = 0;
+      for (; i < cards_num;) {
+        t2 = this.x;
+        ++i;
+        t3 = J.$mul$ns(J.get$width$x(ctrl.canvas), i);
+        if (typeof t3 !== "number")
+          return t3.$div();
+        card_x = t2 + t3 / t1;
+        ctx.fillStyle = "#660000";
+        t3 = $.Card_HALF_WIDTH;
+        t2 = this.y;
+        t4 = $.Card_HALF_HEIGHT;
+        ctx.fillRect(card_x - t3, t2 - t4, t3 * 2, t4 * 2);
+        ctx.strokeStyle = "#000000";
+        t4 = $.Card_HALF_WIDTH;
+        t3 = this.y;
+        t2 = $.Card_HALF_HEIGHT;
+        ctx.strokeRect(card_x - t4, t3 - t2, t4 * 2, t2 * 2);
+      }
+    }
+  },
+  OpponentHand_fetch_closure: {
+    "^": "Closure:10;this_0",
+    call$1: function(fileContents) {
+      F.Controller_get();
+      this.this_0.card_count = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
+    }
   }
 }],
 ["", "main.dart", , F, {
@@ -6574,6 +6616,7 @@ var $$ = {};
     var ctrl = F.Controller_get();
     ctrl.add_listeners$0();
     ctrl.player_1_hand.fetch$0();
+    ctrl.player_2_hand.fetch$0();
     C.Window_methods.get$animationFrame(window).then$1(ctrl.get$render());
   }, "call$0", "main$closure", 0, 0, 1]
 },
