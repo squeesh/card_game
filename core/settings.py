@@ -97,3 +97,6 @@ TEMPLATE_DIRS = (
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_EXPOSE_HEADERS = ('Access-Control-Allow-Origin',)
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'

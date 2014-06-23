@@ -14,7 +14,8 @@ def manage_controller(func):
 
         db_game = request.user.games.get()
         ctrl = db_game.get_controller()
-        request.user.player = ctrl.get_player_for_user(request.user)
+        request.player   = ctrl.get_player_for_user(request.user)
+        request.opponent = ctrl.get_opponent_for_user(request.user)
 
         response = func(request, ctrl=ctrl, *args, **kwargs)
 

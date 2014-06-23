@@ -10,3 +10,8 @@ class WebGinController(GinController):
         for player in self.players:
             if user.id == player.user.id:
                 return player
+
+    def get_opponent_for_user(self, user):
+        for player in self.players:
+            if user.id != player.user.id:
+                return player
