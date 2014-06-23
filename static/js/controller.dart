@@ -2,10 +2,12 @@ library controller;
 
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
 
 import 'card.dart';
 import 'hand.dart';
 import 'card_holder.dart';
+import 'settings.dart';
 
 
 class Controller {
@@ -27,6 +29,9 @@ class Controller {
   
   DateTime old_now;
   
+  String old_hash;
+  String hash;
+  
   static Controller _ctrl = null;
   
   Controller() {
@@ -46,12 +51,40 @@ class Controller {
     this.player_2_hand = new OpponentHand(0, 0);
     this.deck = new Deck(this.canvas.width / 2.0 - Card.HALF_WIDTH - 10, this.canvas.height / 2.0);
     this.pile = new Pile(this.canvas.width / 2.0 + Card.HALF_WIDTH + 10, this.canvas.height / 2.0);
+    
+    this.old_hash = '';
+    this.hash = '';
   }
   
   void init() {
     this.add_listeners();
     this.player_1_hand.fetch();
     this.player_2_hand.fetch();
+    
+    new Future.delayed(VERIFY_INTERVAL, this.verify_game);
+  }
+  
+  void verify_game() {
+    this.fetch_hash();
+    
+    if(this.old_hash != this.hash){
+      this.fetch_all();
+      this.old_hash = this.hash;
+    }
+    
+    new Future.delayed(VERIFY_INTERVAL, this.verify_game);
+  }
+  
+  void fetch_hash() {
+    HttpRequest.getString("$HOST/hash/").then((String fileContents) {
+      this.hash = JSON.decode(fileContents.toString());
+    });
+  }
+  
+  void fetch_all() {
+    this.player_1_hand.fetch();
+    this.player_2_hand.fetch();
+    this.pile.fetch();
   }
   
   void add_listeners() {

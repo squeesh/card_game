@@ -2935,7 +2935,20 @@ var $$ = {};
 ["controller", "controller.dart", , F, {
   "^": "",
   Controller: {
-    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,player_2_hand,deck,pile,frame_count,old_now",
+    "^": "Object;mouse_x,mouse_y,canvas,ctx,display_data,display_fps,player_1_hand,player_2_hand,deck,pile,frame_count,old_now,old_hash,hash",
+    verify_game$0: [function() {
+      this.fetch_hash$0();
+      if (!J.$eq(this.old_hash, this.hash)) {
+        this.player_1_hand.fetch$0();
+        this.player_2_hand.fetch$0();
+        this.pile.fetch$0();
+        this.old_hash = this.hash;
+      }
+      P.Future_Future$delayed(C.Duration_1000000, this.get$verify_game());
+    }, "call$0", "get$verify_game", 0, 0, 1],
+    fetch_hash$0: function() {
+      W.HttpRequest_getString("http://squeesh.net:8000/hash/", null, null).then$1(new F.Controller_fetch_hash_closure(this));
+    },
     add_listeners$0: function() {
       var t1 = J.get$onMouseMove$x(this.canvas);
       H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.Controller_add_listeners_closure(this)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
@@ -3028,16 +3041,24 @@ var $$ = {};
       t1 = new S.Pile(null, t3 / 2 + t2 + 10, t1 / 2, false);
       t1.fetch$0();
       this.pile = t1;
+      this.old_hash = "";
+      this.hash = "";
     },
     static: {"^": "Controller__ctrl", Controller_get: function() {
         var t1 = $.Controller__ctrl;
         if (t1 == null) {
-          t1 = new F.Controller(null, null, null, null, "", "", null, null, null, null, null, null);
+          t1 = new F.Controller(null, null, null, null, "", "", null, null, null, null, null, null, null, null);
           t1.Controller$0();
           $.Controller__ctrl = t1;
         }
         return t1;
       }}
+  },
+  Controller_fetch_hash_closure: {
+    "^": "Closure:10;this_0",
+    call$1: function(fileContents) {
+      this.this_0.hash = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
+    }
   },
   Controller_add_listeners_closure: {
     "^": "Closure:13;this_0",
@@ -3286,6 +3307,13 @@ var $$ = {};
       return errorHandler;
     }
   },
+  Future_Future$delayed: function(duration, computation) {
+    var completer, result;
+    completer = H.setRuntimeTypeInfo(new P._SyncCompleter(P._Future$(null)), [null]);
+    result = completer.future.then$1(new P.Future_Future$delayed_closure(computation));
+    P.Timer_Timer(duration, new P.Future_Future$delayed_closure0(completer));
+    return result;
+  },
   _asyncRunCallbackLoop: function() {
     var entry = $._nextCallback;
     for (; entry != null;) {
@@ -3412,6 +3440,21 @@ var $$ = {};
   _AsyncError: {
     "^": "Object;error>,stackTrace<",
     $isError: true
+  },
+  Future_Future$delayed_closure: {
+    "^": "Closure:8;computation_0",
+    call$1: function(ignored) {
+      return this.computation_0.call$0();
+    }
+  },
+  Future_Future$delayed_closure0: {
+    "^": "Closure:6;completer_1",
+    call$0: function() {
+      var t1 = this.completer_1.future;
+      if (t1._state !== 0)
+        H.throwExpression(P.StateError$("Future already completed"));
+      t1._complete$1(null);
+    }
   },
   _Completer: {
     "^": "Object;"
@@ -6556,7 +6599,6 @@ var $$ = {};
     "^": "Closure:10;this_0",
     call$1: function(fileContents) {
       var json_data, t1, t2, data, t3;
-      F.Controller_get();
       json_data = C.JsonCodec_null_null.decode$1(J.toString$0(fileContents));
       t1 = J.getInterceptor$asx(json_data);
       t1.get$length(json_data);
@@ -6617,6 +6659,7 @@ var $$ = {};
     ctrl.add_listeners$0();
     ctrl.player_1_hand.fetch$0();
     ctrl.player_2_hand.fetch$0();
+    P.Future_Future$delayed(C.Duration_1000000, ctrl.get$verify_game());
     C.Window_methods.get$animationFrame(window).then$1(ctrl.get$render());
   }, "call$0", "main$closure", 0, 0, 1]
 },
@@ -6629,11 +6672,11 @@ $$ = null;
 P.$int.$is$int = true;
 P.$int.$isnum = true;
 P.$int.$isObject = true;
+P.Duration.$isObject = true;
 P.num.$isnum = true;
 P.num.$isObject = true;
 P.String.$isString = true;
 P.String.$isObject = true;
-P.Duration.$isObject = true;
 P.Object.$isObject = true;
 W.HttpRequest.$isObject = true;
 W.ProgressEvent.$isObject = true;
@@ -6651,12 +6694,12 @@ G.Card.$isCard = true;
 G.Card.$isObject = true;
 P.StackTrace.$isStackTrace = true;
 P.StackTrace.$isObject = true;
+P.Function.$isFunction = true;
+P.Function.$isObject = true;
 P._EventSink.$is_EventSink = true;
 P._EventSink.$isObject = true;
 F.Controller.$isController = true;
 F.Controller.$isObject = true;
-P.Function.$isFunction = true;
-P.Function.$isObject = true;
 // getInterceptor methods
 J.getInterceptor = function(receiver) {
   if (typeof receiver == "number") {
@@ -6832,6 +6875,7 @@ C.C_DynamicRuntimeType = new H.DynamicRuntimeType();
 C.C_OutOfMemoryError = new P.OutOfMemoryError();
 C.C__RootZone = new P._RootZone();
 C.Duration_0 = new P.Duration(0);
+C.Duration_1000000 = new P.Duration(1000000);
 C.EventStreamProvider_error = new W.EventStreamProvider("error");
 C.EventStreamProvider_load = new W.EventStreamProvider("load");
 C.EventStreamProvider_mousedown = new W.EventStreamProvider("mousedown");
