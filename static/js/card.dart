@@ -17,9 +17,7 @@ class Card {
   
   void render(Controller ctrl, num x, num y) {
     CanvasRenderingContext2D ctx = ctrl.ctx;
-    
-//    num offset = 0;
-    
+
     if(this.highlight) {
       ctx.fillStyle = '#ccccdd';
     } else {

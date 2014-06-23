@@ -21,8 +21,6 @@ class PlayerHand {
   
   void fetch() {
     HttpRequest.getString("$HOST/hand/").then((String fileContents) {
-      Controller ctrl = Controller.get();
-      
       var json_data = JSON.decode(fileContents.toString());
       num cards_num = json_data.length;
 
